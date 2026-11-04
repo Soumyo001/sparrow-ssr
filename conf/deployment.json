@@ -1,0 +1,16 @@
+
+{
+  "message": "Site Deployed successfully",
+  "data": {
+    "uploaded_file_paths": [
+      "https://cdn.123presto.com/beta/preview/test-travel-templates/header.json",
+      "https://cdn.123presto.com/beta/preview/test-travel-templates/footer.json",
+      "https://cdn.123presto.com/beta/preview/test-travel-templates/privacy-policy.json",
+      "https://cdn.123presto.com/beta/preview/test-travel-templates/site-terms.json",
+      "https://cdn.123presto.com/beta/preview/test-travel-templates/home.json",
+      "https://cdn.123presto.com/beta/preview/test-travel-templates/untitled-post-wrurmp.json",
+      "https://cdn.123presto.com/beta/preview/test-travel-templates/links.json"
+    ],
+    "published_domain": "https://test-travel-templates.beta.123presto.com/"
+  }
+}
