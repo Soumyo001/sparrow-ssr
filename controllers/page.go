@@ -33,8 +33,7 @@ type PageController struct {
 }
 
 func (c *PageController) Get() {
-	if dependencies.catalog == nil ||
-		dependencies.loader == nil {
+	if dependencies.catalog == nil || dependencies.loader == nil {
 		c.writeError(
 			http.StatusInternalServerError,
 			"Application is not initialized",
@@ -116,8 +115,7 @@ func (c *PageController) Get() {
 		content.Page.Head.JSFile,
 	)
 
-	// These fragments originate from the trusted
-	// site-publishing pipeline, not visitor input.
+	// These fragments originate from the trusted site-publishing pipeline, not visitor input.
 	c.Data["HeaderHTML"] = template.HTML(
 		content.Header.HeaderHTML,
 	)
