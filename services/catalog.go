@@ -177,9 +177,7 @@ func NewCatalog(
 
 		var page models.PageDocument
 
-		if err := readJSON(
-			root, relative, &page,
-		); err != nil {
+		if err := readJSON(root, relative, &page); err != nil {
 			return nil, err
 		}
 

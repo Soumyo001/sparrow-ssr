@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"os"
+	"strings"
 
 	"sparrow-ssr/routers"
 	"sparrow-ssr/services"
@@ -12,21 +14,25 @@ import (
 func main() {
 	const contentRoot = "content"
 
-	catalog, err := services.NewCatalog(
-		contentRoot,
-		"conf/deployment.json",
-	)
+	// Existing single-deployment startup remains the default.
+	deploymentFiles := []string{"conf/deployment.json"}
+
+	// Optional, explicit comma-separated deployment metadata file paths.
+	if configured := os.Getenv("SPARROW_DEPLOYMENTS"); configured != "" {
+		deploymentFiles = strings.Split(configured, ",")
+		for _, file := range deploymentFiles {
+			deploymentFiles = append(deploymentFiles, strings.TrimSpace(file))
+		}
+	}
+
+	catalog, err := services.NewMultiCatalog(contentRoot, deploymentFiles)
 	if err != nil {
-		log.Fatalf(
-			"initialize site catalog: %v", err,
-		)
+		log.Fatalf("initialize site catalog: %v", err)
 	}
 
 	loader, err := services.NewContentLoader(contentRoot)
 	if err != nil {
-		log.Fatalf(
-			"initialize content loader: %v", err,
-		)
+		log.Fatalf("initialize content loader: %v", err)
 	}
 
 	routers.Register(catalog, loader)
@@ -34,13 +40,9 @@ func main() {
 	beego.BConfig.WebConfig.ViewsPath = "views"
 
 	if err := beego.AddViewPath("views"); err != nil {
-		log.Fatalf(
-			"initialize HTML templates: %v", err,
-		)
+		log.Fatalf("initialize HTML templates: %v", err)
 	}
 
-	log.Printf("Catalog ready: %d pages", catalog.Count())
-
-	log.Println("Server-side HTML renderer initialized")
-	beego.Run()
+	log.Printf("Catalog ready: %d pages from %d deployment(s)", catalog.Count(), len(deploymentFiles))
+	beego.Run("127.0.0.1:8080")
 }
