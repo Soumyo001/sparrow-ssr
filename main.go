@@ -20,8 +20,8 @@ func main() {
 	// Optional, explicit comma-separated deployment metadata file paths.
 	if configured := os.Getenv("SPARROW_DEPLOYMENTS"); configured != "" {
 		deploymentFiles = strings.Split(configured, ",")
-		for _, file := range deploymentFiles {
-			deploymentFiles = append(deploymentFiles, strings.TrimSpace(file))
+		for i, file := range deploymentFiles {
+			deploymentFiles[i] = strings.TrimSpace(file)
 		}
 	}
 
