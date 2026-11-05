@@ -61,9 +61,7 @@ func NewContentLoader(
 }
 
 // Load returns the decoded documents required for one page.
-func (l *ContentLoader) Load(
-	location models.PageLocation,
-) (models.PageContent, error) {
+func (l *ContentLoader) Load(location models.PageLocation) (models.PageContent, error) {
 
 	// Fast path: try the existing decoded cache first.
 	header, headerReady := l.headers.getReady(
@@ -92,9 +90,7 @@ func (l *ContentLoader) Load(
 
 // loadUncached retains the original loading behavior
 // for performance comparison in benchmarks.
-func (l *ContentLoader) loadUncached(
-	location models.PageLocation,
-) (models.PageContent, error) {
+func (l *ContentLoader) loadUncached(location models.PageLocation) (models.PageContent, error) {
 	return l.loadConcurrent(location, false)
 }
 
