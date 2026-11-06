@@ -189,6 +189,27 @@ func TestMultiSiteSSRHTTP(t *testing.T) {
 				},
 			},
 		)
+
+		windowStart := "2026-11-01"
+
+		if tc.site == "bravo" {
+			windowStart = "2026-11-15"
+		}
+
+		writeFixture(
+			t,
+			filepath.Join(folder, "availability.json"),
+			models.PropertyAvailability{
+				Properties: map[string][]models.AvailabilityWindow{
+					tc.id: {
+						{
+							Start: windowStart,
+							End:   "2027-12-31",
+						},
+					},
+				},
+			},
+		)
 	}
 
 	propertySearch, err :=
@@ -500,6 +521,110 @@ func TestMultiSiteSSRHTTP(t *testing.T) {
 					tc.host,
 					tc.propertyID,
 					result.Properties[0].ID,
+				)
+			}
+		}
+	})
+
+	t.Run("PropertyAPIDates", func(t *testing.T) {
+		cases := []struct {
+			host   string
+			query  string
+			status int
+			total  int
+		}{
+			{
+				"alpha.example.com",
+				"search=usa&pax=2&order=1&dateStart=2026-11-06&dateEnd=2026-11-13",
+				http.StatusOK,
+				1,
+			},
+			{
+				"bravo.example.com",
+				"search=usa&pax=2&order=1&dateStart=2026-11-06&dateEnd=2026-11-13",
+				http.StatusOK,
+				0,
+			},
+			{
+				"bravo.example.com",
+				"search=usa&pax=2&order=1&dateStart=2026-11-16&dateEnd=2026-11-20",
+				http.StatusOK,
+				1,
+			},
+			{
+				"alpha.example.com",
+				"search=usa&pax=2&order=1&dateStart=2026-11-13&dateEnd=2026-11-06",
+				http.StatusBadRequest,
+				0,
+			},
+			{
+				"alpha.example.com",
+				"search=usa&pax=2&order=1&dateStart=2026-11-06",
+				http.StatusBadRequest,
+				0,
+			},
+		}
+
+		for _, tc := range cases {
+			recorder := requestPage(
+				tc.host,
+				"/api/properties?"+tc.query,
+			)
+
+			if recorder.Code != tc.status {
+				t.Errorf(
+					"%s: expected %d, got %d: %s",
+					tc.host,
+					tc.status,
+					recorder.Code,
+					recorder.Body.String(),
+				)
+				continue
+			}
+
+			if !strings.HasPrefix(
+				recorder.Header().Get("Content-Type"),
+				"application/json",
+			) {
+				t.Error("expected application/json")
+			}
+
+			if tc.status != http.StatusOK {
+				var apiError struct {
+					Error string `json:"error"`
+				}
+
+				if err := json.Unmarshal(
+					recorder.Body.Bytes(),
+					&apiError,
+				); err != nil || apiError.Error == "" {
+					t.Errorf(
+						"invalid API error response: %v",
+						err,
+					)
+				}
+				continue
+			}
+
+			var result struct {
+				Total      int               `json:"total"`
+				Properties []models.Property `json:"properties"`
+			}
+
+			if err := json.Unmarshal(
+				recorder.Body.Bytes(),
+				&result,
+			); err != nil {
+				t.Fatal(err)
+			}
+
+			if result.Total != tc.total ||
+				len(result.Properties) != tc.total {
+				t.Errorf(
+					"%s: expected %d properties, got %d",
+					tc.host,
+					tc.total,
+					len(result.Properties),
 				)
 			}
 		}

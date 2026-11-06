@@ -7,21 +7,21 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"sparrow-ssr/models"
 )
 
-// PropertySearchService reads demo listings
-// from a separate mock-data root.
 type PropertySearchService struct {
 	root string
 }
 
-// PropertyFilters represents the search parameters.
 type PropertyFilters struct {
-	Search string
-	Pax    int
-	Order  int
+	Search    string
+	Pax       int
+	Order     int
+	DateStart string
+	DateEnd   string
 }
 
 func NewPropertySearchService(
@@ -48,13 +48,47 @@ func NewPropertySearchService(
 		)
 	}
 
-	return &PropertySearchService{
-		root: root,
-	}, nil
+	return &PropertySearchService{root: root}, nil
 }
 
-// Search selects listings within one site's explicitly supplied storage directory.
-// Host-to-directory resolution belongs to the deployment catalog, not this service.
+// ParseStayDates accepts either no dates or
+// a valid [check-in, checkout) range.
+func ParseStayDates(
+	start, end string,
+) (time.Time, time.Time, error) {
+	if start == "" && end == "" {
+		return time.Time{}, time.Time{}, nil
+	}
+
+	if start == "" || end == "" {
+		return time.Time{}, time.Time{},
+			fmt.Errorf(
+				"dateStart and dateEnd must both be provided",
+			)
+	}
+
+	checkIn, err := time.Parse("2006-01-02", start)
+	if err != nil {
+		return time.Time{}, time.Time{},
+			fmt.Errorf("dateStart must be YYYY-MM-DD")
+	}
+
+	checkOut, err := time.Parse("2006-01-02", end)
+	if err != nil {
+		return time.Time{}, time.Time{},
+			fmt.Errorf("dateEnd must be YYYY-MM-DD")
+	}
+
+	if !checkOut.After(checkIn) {
+		return time.Time{}, time.Time{},
+			fmt.Errorf(
+				"dateEnd must be after dateStart",
+			)
+	}
+
+	return checkIn, checkOut, nil
+}
+
 func (s *PropertySearchService) Search(
 	siteDirectory string,
 	filters PropertyFilters,
@@ -79,11 +113,16 @@ func (s *PropertySearchService) Search(
 		)
 	}
 
-	filename := filepath.Join(
-		s.root,
-		siteDirectory,
-		"properties.json",
+	start, end, err := ParseStayDates(
+		filters.DateStart,
+		filters.DateEnd,
 	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Load this site's existing listing data.
+	filename := filepath.Join(s.root, siteDirectory, "properties.json")
 
 	contents, err := os.ReadFile(filename)
 	if err != nil {
@@ -100,6 +139,27 @@ func (s *PropertySearchService) Search(
 		)
 	}
 
+	// Load availability only for date searches.
+	// Search without dates preserves old behavior.
+	var availability models.PropertyAvailability
+
+	if !start.IsZero() {
+		filename := filepath.Join(s.root, siteDirectory, "availability.json")
+
+		contents, err := os.ReadFile(filename)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"read mock availability: %w", err,
+			)
+		}
+
+		if err := json.Unmarshal(contents, &availability); err != nil {
+			return nil, fmt.Errorf(
+				"decode mock availability: %w", err,
+			)
+		}
+	}
+
 	query := strings.ToLower(
 		strings.TrimSpace(filters.Search),
 	)
@@ -107,12 +167,30 @@ func (s *PropertySearchService) Search(
 	results := make([]models.Property, 0, len(data.Properties))
 
 	for _, property := range data.Properties {
-		if property.MaxGuests < filters.Pax {
+		// Existing guest and destination filters.
+		if property.MaxGuests < filters.Pax || (query != "" && !matchesProperty(property, query)) {
 			continue
 		}
 
-		if query != "" && !matchesProperty(property, query) {
-			continue
+		// New date availability filter.
+		if !start.IsZero() {
+			matched, err := coversStay(
+				availability.Properties[property.ID],
+				start,
+				end,
+			)
+
+			if err != nil {
+				return nil, fmt.Errorf(
+					"invalid availability for %s: %w",
+					property.ID,
+					err,
+				)
+			}
+
+			if !matched {
+				continue
+			}
 		}
 
 		results = append(results, property)
@@ -129,6 +207,36 @@ func (s *PropertySearchService) Search(
 	})
 
 	return results, nil
+}
+
+// A stay must fit fully inside one available window.
+func coversStay(
+	windows []models.AvailabilityWindow,
+	start, end time.Time,
+) (bool, error) {
+	for _, window := range windows {
+		first, err := time.Parse("2006-01-02", window.Start)
+		if err != nil {
+			return false, fmt.Errorf(
+				"invalid window start %q",
+				window.Start,
+			)
+		}
+
+		last, err := time.Parse("2006-01-02", window.End)
+		if err != nil || !last.After(first) {
+			return false, fmt.Errorf(
+				"invalid window end %q",
+				window.End,
+			)
+		}
+
+		if !start.Before(first) && !end.After(last) {
+			return true, nil
+		}
+	}
+
+	return false, nil
 }
 
 func matchesProperty(

@@ -77,11 +77,40 @@
 
             <div class="refine-toolbar">
                 <div class="refine-filters">
-                    <button id="refine-dates"
-                            type="button"
-                            class="refine-date-button">
-                        Dates
-                    </button>
+                    <details id="refine-date-dropdown"
+                             class="refine-date-dropdown">
+
+                        <summary id="refine-dates"
+                                 class="refine-date-button">
+                            Dates
+                        </summary>
+
+                        <div class="refine-date-panel">
+                            <label for="refine-date-start">
+                                Check-in
+                                <input id="refine-date-start"
+                                       type="date">
+                            </label>
+
+                            <label for="refine-date-end">
+                                Checkout
+                                <input id="refine-date-end"
+                                       type="date">
+                            </label>
+
+                            <div class="refine-date-actions">
+                                <button id="refine-date-clear"
+                                        type="button">
+                                    Clear
+                                </button>
+
+                                <button id="refine-date-apply"
+                                        type="button">
+                                    Apply Dates
+                                </button>
+                            </div>
+                        </div>
+                    </details>
 
                     <label for="refine-max-price">
                         Maximum Price (৳)

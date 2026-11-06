@@ -41,6 +41,8 @@ type propertySearchResponse struct {
 	Pax        int               `json:"pax"`
 	Order      int               `json:"order"`
 	Total      int               `json:"total"`
+	DateStart  string            `json:"dateStart,omitempty"`
+	DateEnd    string            `json:"dateEnd,omitempty"`
 	Properties []models.Property `json:"properties"`
 }
 
@@ -60,6 +62,17 @@ func (c *PropertyAPIController) Get() {
 	params := c.Ctx.Request.URL.Query()
 
 	search := strings.TrimSpace(params.Get("search"))
+
+	dateStart := strings.TrimSpace(params.Get("dateStart"))
+	dateEnd := strings.TrimSpace(params.Get("dateEnd"))
+
+	if _, _, err := services.ParseStayDates(dateStart, dateEnd); err != nil {
+		c.writeJSONError(
+			http.StatusBadRequest,
+			err.Error(),
+		)
+		return
+	}
 
 	// Default search parameters:
 	// 2 guests and Most Popular sorting.
@@ -112,9 +125,11 @@ func (c *PropertyAPIController) Get() {
 	properties, err := propertyAPI.search.Search(
 		location.ContentDirectory,
 		services.PropertyFilters{
-			Search: search,
-			Pax:    pax,
-			Order:  order,
+			Search:    search,
+			Pax:       pax,
+			Order:     order,
+			DateStart: dateStart,
+			DateEnd:   dateEnd,
 		},
 	)
 
@@ -134,6 +149,8 @@ func (c *PropertyAPIController) Get() {
 		Pax:        pax,
 		Order:      order,
 		Total:      len(properties),
+		DateStart:  dateStart,
+		DateEnd:    dateEnd,
 		Properties: properties,
 	}
 

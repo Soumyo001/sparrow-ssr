@@ -15,6 +15,11 @@
         poolOnly: document.getElementById("refine-pool-only"),
         sort: document.getElementById("refine-sort"),
         dates: document.getElementById("refine-dates"),
+        dateDropdown: document.getElementById("refine-date-dropdown"),
+        dateStart: document.getElementById("refine-date-start"),
+        dateEnd: document.getElementById("refine-date-end"),
+        dateApply: document.getElementById("refine-date-apply"),
+        dateClear: document.getElementById("refine-date-clear"),
         status: document.getElementById("refine-status"),
         grid: document.getElementById("refine-grid"),
         dialog: document.getElementById("refine-dialog"),
@@ -26,6 +31,8 @@
     const state = {
         search: "",
         pax: 2,
+        dateStart: "",
+        dateEnd: "",
         properties: [],
         favorites: new Set()
     };
@@ -47,10 +54,44 @@
         elements.destination.value = state.search;
         elements.guests.value = String(state.pax);
 
+        state.dateStart = params.get("dateStart") || "";
+        state.dateEnd = params.get("dateEnd") || "";
+
+        elements.dateStart.value = state.dateStart;
+        elements.dateEnd.value = state.dateEnd;
+
+        updateDateSummary();
+
         const name = state.search || "your destination";
 
         elements.headingDestination.textContent = name;
         elements.breadcrumbDestination.textContent = name;
+    }
+
+    function formatDateLabel(isoDate) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(isoDate)) {
+            return isoDate;
+        }
+
+        const date = new Date(`${isoDate}T00:00:00Z`);
+
+        if (Number.isNaN(date.getTime())) {
+            return isoDate;
+        }
+
+        return date.toLocaleDateString("en-US", {
+            month: "short",
+            day: "2-digit",
+            timeZone: "UTC"
+        });
+    }
+
+    function updateDateSummary() {
+        elements.dates.textContent =
+            state.dateStart && state.dateEnd
+                ? `${formatDateLabel(state.dateStart)} – ` +
+                  `${formatDateLabel(state.dateEnd)}`
+                : "Dates";
     }
 
     // Update the page URL without a full reload.
@@ -60,6 +101,11 @@
             pax: String(state.pax),
             order: "1"
         });
+
+        if (state.dateStart && state.dateEnd) {
+            params.set("dateStart", state.dateStart);
+            params.set("dateEnd", state.dateEnd);
+        }
 
         window.history.pushState(
             {},
@@ -376,6 +422,11 @@
             order: "1"
         });
 
+        if (state.dateStart || state.dateEnd) {
+            params.set("dateStart", state.dateStart);
+            params.set("dateEnd", state.dateEnd);
+        }
+
         try {
             const response = await fetch(
                 `/api/properties?${params.toString()}`,
@@ -451,12 +502,54 @@
     elements.poolOnly.addEventListener("change", render);
     elements.sort.addEventListener("change", render);
 
-    elements.dates.addEventListener("click", () => {
-        showDialog(
-            "Dates",
-            "Availability by date cannot be searched " +
-            "because the mock dataset has no availability calendar."
-        );
+    elements.dateApply.addEventListener("click", () => {
+        const start = elements.dateStart.value;
+        const end = elements.dateEnd.value;
+
+        // Both dates must be selected.
+        if ((start && !end) || (!start && end)) {
+            showDialog(
+                "Invalid dates",
+                "Select both check-in and checkout."
+            );
+            return;
+        }
+
+        // Checkout must follow check-in.
+        if (start && end <= start) {
+            showDialog(
+                "Invalid dates",
+                "Checkout must be after check-in."
+            );
+            return;
+        }
+
+        state.dateStart = start;
+        state.dateEnd = end;
+
+        updateURL();
+        updateDateSummary();
+
+        elements.dateDropdown.open = false;
+
+        // Re-fetch because date filtering happens
+        // in the Beego API, not only in the browser.
+        load();
+    });
+
+    elements.dateClear.addEventListener("click", () => {
+        state.dateStart = "";
+        state.dateEnd = "";
+
+        elements.dateStart.value = "";
+        elements.dateEnd.value = "";
+
+        updateURL();
+        updateDateSummary();
+
+        elements.dateDropdown.open = false;
+
+        load();
     });
 
     elements.closeDialog.addEventListener(
