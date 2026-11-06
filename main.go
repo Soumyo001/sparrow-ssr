@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	const contentRoot = "content"
+	const contentRoot string = "content"
 
 	// Existing single-deployment startup remains the default.
 	deploymentFiles := []string{"conf/deployment.json"}
