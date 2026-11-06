@@ -505,4 +505,90 @@ func TestMultiSiteSSRHTTP(t *testing.T) {
 		}
 	})
 
+	t.Run("RefineClientPage", func(t *testing.T) {
+		cases := []struct {
+			host        string
+			expected    string
+			notExpected string
+		}{
+			{
+				host:        "alpha.example.com",
+				expected:    "alpha header",
+				notExpected: "bravo header",
+			},
+			{
+				host:        "bravo.example.com",
+				expected:    "bravo header",
+				notExpected: "alpha header",
+			},
+		}
+
+		for _, tc := range cases {
+			recorder := requestPage(
+				tc.host,
+				"/refine?search=usa&pax=2&order=1",
+			)
+
+			if recorder.Code != http.StatusOK {
+				t.Fatalf(
+					"%s/refine: expected 200, got %d: %s",
+					tc.host,
+					recorder.Code,
+					recorder.Body.String(),
+				)
+			}
+
+			if !strings.HasPrefix(
+				recorder.Header().Get("Content-Type"),
+				"text/html",
+			) {
+				t.Errorf(
+					"%s: expected HTML response",
+					tc.host,
+				)
+			}
+
+			body := recorder.Body.String()
+
+			required := []string{
+				`id="refine-app"`,
+				`id="refine-grid"`,
+				`/static/css/refine.css`,
+				`/static/js/refine.js`,
+				"https://" + tc.host + "/refine",
+				tc.expected,
+			}
+
+			for _, fragment := range required {
+				if !strings.Contains(body, fragment) {
+					t.Errorf(
+						"%s: missing %q",
+						tc.host,
+						fragment,
+					)
+				}
+			}
+
+			if strings.Contains(body, tc.notExpected) {
+				t.Errorf(
+					"%s: another site's header leaked",
+					tc.host,
+				)
+			}
+		}
+
+		// The virtual route must not bypass hostname checks.
+		unknown := requestPage(
+			"unknown.example.com",
+			"/refine?search=usa&pax=2&order=1",
+		)
+
+		if unknown.Code != http.StatusNotFound {
+			t.Errorf(
+				"unknown host: expected 404, got %d",
+				unknown.Code,
+			)
+		}
+	})
+
 }

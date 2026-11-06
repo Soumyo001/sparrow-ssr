@@ -1,0 +1,375 @@
+
+body.refine-route {
+    margin: 0;
+}
+
+.refine-app,
+.refine-app * {
+    box-sizing: border-box;
+}
+
+.refine-app {
+    min-height: 100vh;
+    padding: 155px 26px 70px;
+    background: #dffbfc;
+    color: #082e33;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.refine-inner {
+    max-width: 1680px;
+    margin: 0 auto;
+}
+
+.refine-breadcrumb {
+    margin: 0 0 15px;
+    color: #42656b;
+    font-size: 13px;
+}
+
+.refine-app h1 {
+    font-size: clamp(28px, 2.4vw, 40px);
+    line-height: 1.15;
+    margin: 0 0 10px;
+    font-weight: 700;
+    color: #073037;
+}
+
+.refine-subtitle {
+    margin: 0 0 20px;
+    font-size: 16px;
+}
+
+.refine-search-form {
+    display: flex;
+    align-items: end;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 17px;
+}
+
+.refine-search-form label,
+.refine-filters label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.refine-search-form input,
+.refine-filters input,
+.refine-filters select {
+    min-height: 38px;
+    border: 1px solid #bad5d8;
+    border-radius: 12px;
+    padding: 7px 12px;
+    color: #153c40;
+    background: white;
+    font: inherit;
+    font-size: 14px;
+}
+
+.refine-search-form input[type="search"] {
+    width: min(300px, 70vw);
+}
+
+.refine-search-form input[type="number"] {
+    width: 88px;
+}
+
+.refine-search-submit {
+    min-height: 38px;
+    border: none;
+    border-radius: 12px;
+    padding: 0 20px;
+    background: #07343c;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.refine-toolbar {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 18px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.refine-filters {
+    display: flex;
+    align-items: end;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.refine-filters input[type="number"] {
+    width: 135px;
+}
+
+.refine-filters .refine-filter-checkbox {
+    flex-direction: row;
+    align-items: center;
+    min-height: 38px;
+    gap: 7px;
+    font-size: 13px;
+}
+
+.refine-filters input[type="checkbox"] {
+    min-height: auto;
+}
+
+.refine-date-button {
+    min-height: 38px;
+    border-radius: 20px;
+    border: 1px solid #d6e5e8;
+    background: white;
+    padding: 0 20px;
+    cursor: pointer;
+}
+
+.refine-sort-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.refine-sort-label select {
+    border: 1.5px solid #0b4148;
+    border-radius: 22px;
+    min-height: 38px;
+    padding: 7px 14px;
+    background: transparent;
+    color: #07343c;
+}
+
+.refine-status {
+    margin: 3px 0 15px;
+    color: #35595e;
+    font-size: 13px;
+}
+
+.refine-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    align-items: stretch;
+}
+
+.refine-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    background: #fff;
+    border-radius: 9px;
+    box-shadow: 0 2px 8px rgba(16, 68, 74, .07);
+}
+
+.refine-card-picture {
+    position: relative;
+    height: 226px;
+    background: #b6d4da;
+}
+
+.refine-card-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.refine-image-fallback {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    color: #345c63;
+}
+
+.refine-price {
+    position: absolute;
+    left: 8px;
+    bottom: 8px;
+    padding: 4px 6px;
+    background: #fdfdfd;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 3px;
+}
+
+.refine-eco {
+    position: absolute;
+    right: 53px;
+    top: 11px;
+    background: #e2f6e8;
+    color: #256b39;
+    padding: 4px 7px;
+    border-radius: 20px;
+    font-size: 11px;
+}
+
+.refine-favorite {
+    position: absolute;
+    top: 9px;
+    right: 10px;
+    border: 1px solid rgba(255, 255, 255, .6);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    background: rgba(15, 44, 54, .45);
+    color: white;
+    cursor: pointer;
+    font-size: 23px;
+    line-height: 1;
+}
+
+.refine-favorite[aria-pressed="true"] {
+    color: #ffb4b4;
+}
+
+.refine-card-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 10px 12px 12px;
+    font-size: 12px;
+}
+
+.refine-card-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    align-items: center;
+}
+
+.refine-rating {
+    font-weight: 700;
+    font-size: 12px;
+}
+
+.refine-property-type {
+    color: #546e72;
+}
+
+.refine-card-title {
+    margin: 7px 0;
+    font-size: 14px;
+    line-height: 1.3;
+    font-weight: 700;
+    color: #082e33;
+}
+
+.refine-card-details,
+.refine-card-location {
+    margin: 2px 0;
+    color: #36585d;
+    line-height: 1.5;
+}
+
+.refine-card-bottom {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 13px;
+}
+
+.refine-provider {
+    color: #173d68;
+    font-weight: 700;
+    font-size: 12px;
+}
+
+.refine-availability {
+    padding: 9px 11px;
+    border: 0;
+    border-radius: 5px;
+    color: white;
+    background: #ff790b;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.refine-search-submit:focus-visible,
+.refine-availability:focus-visible,
+.refine-favorite:focus-visible,
+.refine-date-button:focus-visible {
+    outline: 3px solid #3083b7;
+    outline-offset: 2px;
+}
+
+.refine-empty {
+    grid-column: 1 / -1;
+    padding: 36px 18px;
+    background: white;
+    border-radius: 10px;
+}
+
+dialog.refine-dialog {
+    max-width: min(450px, calc(100vw - 30px));
+    border: 0;
+    border-radius: 14px;
+    padding: 26px;
+    color: #092d35;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .25);
+}
+
+dialog.refine-dialog::backdrop {
+    background: rgba(0, 0, 0, .55);
+}
+
+.refine-dialog h2 {
+    font-size: 23px;
+    margin: 0 0 12px;
+}
+
+.refine-dialog p {
+    line-height: 1.5;
+}
+
+.refine-dialog button {
+    background: #07343c;
+    border: 0;
+    border-radius: 8px;
+    color: #fff;
+    padding: 10px 18px;
+    cursor: pointer;
+}
+
+@media (max-width: 1240px) {
+    .refine-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 910px) {
+    .refine-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .refine-app {
+        padding-top: 145px;
+    }
+}
+
+@media (max-width: 600px) {
+    .refine-app {
+        padding: 125px 15px 50px;
+    }
+
+    .refine-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .refine-card-picture {
+        height: 235px;
+    }
+}

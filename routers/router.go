@@ -15,6 +15,7 @@ func Register(
 	controllers.SetDependencies(catalog, loader)
 
 	beego.Router("/", &controllers.PageController{})
+	beego.Router("/refine", &controllers.RefineController{}, "get:Get")
 	beego.Router("/*", &controllers.PageController{})
 }
 
