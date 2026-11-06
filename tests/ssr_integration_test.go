@@ -151,6 +151,53 @@ func TestMultiSiteSSRHTTP(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// Create separate property datasets for the two test sites.
+	mockRoot := t.TempDir()
+
+	for _, tc := range []struct {
+		site string
+		id   string
+	}{
+		{"alpha", "alpha-property"},
+		{"bravo", "bravo-property"},
+	} {
+		folder := filepath.Join(
+			mockRoot,
+			"beta",
+			"preview",
+			tc.site,
+		)
+
+		if err := os.MkdirAll(folder, 0755); err != nil {
+			t.Fatal(err)
+		}
+
+		writeFixture(
+			t,
+			filepath.Join(folder, "properties.json"),
+			models.PropertyDataset{
+				Properties: []models.Property{
+					{
+						ID:        tc.id,
+						Name:      tc.site + " Property",
+						MaxGuests: 4,
+						Location: models.PropertyLocation{
+							Country: "USA",
+						},
+						PopularityScore: 90,
+					},
+				},
+			},
+		)
+	}
+
+	propertySearch, err :=
+		services.NewPropertySearchService(mockRoot)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	// Initialize Beego using the actual project directory.
 	// TestBeegoInit loads the application configuration
 	// and initializes the default views directory.
@@ -163,6 +210,8 @@ func TestMultiSiteSSRHTTP(t *testing.T) {
 
 	// Register our actual application controller and routes.
 	routers.Register(catalog, loader)
+
+	routers.RegisterPropertyAPI(catalog, propertySearch)
 
 	cases := []struct {
 		host        string
@@ -298,4 +347,162 @@ func TestMultiSiteSSRHTTP(t *testing.T) {
 			"unknown routes triggered extra reads: %d", got,
 		)
 	}
+
+	t.Run("PropertyAPI", func(t *testing.T) {
+		cases := []struct {
+			host       string
+			query      string
+			status     int
+			total      int
+			propertyID string
+		}{
+			{
+				"alpha.example.com",
+				"search=usa&pax=2&order=1",
+				http.StatusOK,
+				1,
+				"alpha-property",
+			},
+			{
+				"bravo.example.com",
+				"search=usa&pax=2&order=1",
+				http.StatusOK,
+				1,
+				"bravo-property",
+			},
+			{
+				"alpha.example.com",
+				"search=atlantis&pax=2&order=1",
+				http.StatusOK,
+				0,
+				"",
+			},
+			{
+				"alpha.example.com",
+				"search=usa&pax=0&order=1",
+				http.StatusBadRequest,
+				0,
+				"",
+			},
+			{
+				"alpha.example.com",
+				"search=usa&pax=abc&order=1",
+				http.StatusBadRequest,
+				0,
+				"",
+			},
+			{
+				"alpha.example.com",
+				"search=usa&pax=2&order=9",
+				http.StatusBadRequest,
+				0,
+				"",
+			},
+			{
+				"unknown.example.com",
+				"search=usa&pax=2&order=1",
+				http.StatusNotFound,
+				0,
+				"",
+			},
+		}
+
+		for _, tc := range cases {
+			recorder := requestPage(
+				tc.host,
+				"/api/properties?"+tc.query,
+			)
+
+			if recorder.Code != tc.status {
+				t.Errorf(
+					"%s?%s: want status %d, got %d: %s",
+					tc.host,
+					tc.query,
+					tc.status,
+					recorder.Code,
+					recorder.Body.String(),
+				)
+				continue
+			}
+
+			contentType := recorder.Header().Get(
+				"Content-Type",
+			)
+
+			if !strings.HasPrefix(
+				contentType,
+				"application/json",
+			) {
+				t.Errorf(
+					"expected JSON content type, got %q",
+					contentType,
+				)
+			}
+
+			if tc.status != http.StatusOK {
+				var apiError struct {
+					Error string `json:"error"`
+				}
+
+				if err := json.Unmarshal(
+					recorder.Body.Bytes(),
+					&apiError,
+				); err != nil {
+					t.Errorf(
+						"invalid error JSON: %v", err,
+					)
+				} else if apiError.Error == "" {
+					t.Error("expected API error message")
+				}
+
+				continue
+			}
+
+			var result struct {
+				Search     string            `json:"search"`
+				Pax        int               `json:"pax"`
+				Order      int               `json:"order"`
+				Total      int               `json:"total"`
+				Properties []models.Property `json:"properties"`
+			}
+
+			if err := json.Unmarshal(
+				recorder.Body.Bytes(),
+				&result,
+			); err != nil {
+				t.Errorf("invalid response JSON: %v", err)
+				continue
+			}
+
+			if result.Total != tc.total ||
+				len(result.Properties) != tc.total {
+				t.Errorf(
+					"%s: want %d properties, got %d",
+					tc.host,
+					tc.total,
+					len(result.Properties),
+				)
+				continue
+			}
+
+			if result.Pax != 2 && tc.status == http.StatusOK {
+				t.Errorf("unexpected guest count: %d", result.Pax)
+			}
+
+			if result.Order != 1 {
+				t.Errorf("unexpected sort order: %d", result.Order)
+			}
+
+			if tc.total > 0 &&
+				result.Properties[0].ID != tc.propertyID {
+				t.Errorf(
+					"%s: want property %q, got %q",
+					tc.host,
+					tc.propertyID,
+					result.Properties[0].ID,
+				)
+			}
+		}
+	})
+
 }

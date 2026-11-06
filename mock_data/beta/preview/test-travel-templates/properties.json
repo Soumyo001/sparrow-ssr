@@ -1,0 +1,425 @@
+
+{
+  "properties": [
+    {
+      "id": "prop-001",
+      "name": "Blue Heron Beach House",
+      "property_type": "House",
+      "location": {
+        "city": "Galveston",
+        "state": "Texas",
+        "area": "Terramar Beach",
+        "country": "USA"
+      },
+      "max_guests": 8,
+      "size_sqft": 1440,
+      "rating": 10.0,
+      "review_count": 25,
+      "price_from": 14862,
+      "currency": "BDT",
+      "amenities": [
+        "Air Conditioning",
+        "Balcony/Terrace",
+        "Bedding/Linens"
+      ],
+      "provider_name": "Booking.com",
+      "popularity_score": 97,
+      "eco_friendly": false,
+      "images": [
+        "https://images.unsplash.com/photo-1570129477492-45c003edd2be"
+      ]
+    },
+    {
+      "id": "prop-002",
+      "name": "Gulf Front Luxury Penthouse",
+      "property_type": "Condo",
+      "location": {
+        "city": "Destin",
+        "state": "Florida",
+        "area": "Sandestin",
+        "country": "USA"
+      },
+      "max_guests": 6,
+      "size_sqft": 1264,
+      "rating": 10.0,
+      "review_count": 172,
+      "price_from": 115641,
+      "currency": "BDT",
+      "amenities": [
+        "Ocean View",
+        "Air Conditioning",
+        "Balcony/Terrace"
+      ],
+      "provider_name": "Expedia",
+      "popularity_score": 99,
+      "eco_friendly": false,
+      "images": [
+        "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c"
+      ]
+    },
+    {
+      "id": "prop-003",
+      "name": "Oasis Garden Cottage",
+      "property_type": "Cottage",
+      "location": {
+        "city": "Galveston",
+        "state": "Texas",
+        "area": "San Jacinto",
+        "country": "USA"
+      },
+      "max_guests": 4,
+      "size_sqft": 980,
+      "rating": 9.0,
+      "review_count": 36,
+      "price_from": 12261,
+      "currency": "BDT",
+      "amenities": [
+        "Air Conditioning",
+        "Balcony/Terrace",
+        "Bedding/Linens"
+      ],
+      "provider_name": "Booking.com",
+      "popularity_score": 89,
+      "eco_friendly": false,
+      "images": [
+        "https://images.unsplash.com/photo-1590490360182-c33d57733427"
+      ]
+    },
+    {
+      "id": "prop-004",
+      "name": "Highland Mountain Hideaway",
+      "property_type": "House",
+      "location": {
+        "city": "Highlands",
+        "state": "North Carolina",
+        "area": "Franklin",
+        "country": "USA"
+      },
+      "max_guests": 6,
+      "size_sqft": 1500,
+      "rating": 10.0,
+      "review_count": 80,
+      "price_from": 25745,
+      "currency": "BDT",
+      "amenities": [
+        "Mountain View",
+        "Air Conditioning",
+        "Bedding/Linens"
+      ],
+      "provider_name": "Expedia",
+      "popularity_score": 94,
+      "eco_friendly": true,
+      "images": [
+        "https://images.unsplash.com/photo-1470770841072-f978cf4d019e"
+      ]
+    },
+    {
+      "id": "prop-005",
+      "name": "Palm Coast Blue Cottage",
+      "property_type": "Cottage",
+      "location": {
+        "city": "Key West",
+        "state": "Florida",
+        "area": "Old Town",
+        "country": "USA"
+      },
+      "max_guests": 4,
+      "size_sqft": 1120,
+      "rating": 9.6,
+      "review_count": 62,
+      "price_from": 18650,
+      "currency": "BDT",
+      "amenities": [
+        "Air Conditioning",
+        "Parking",
+        "Patio"
+      ],
+      "provider_name": "Booking.com",
+      "popularity_score": 88,
+      "eco_friendly": false,
+      "images": [
+        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750"
+      ]
+    },
+    {
+      "id": "prop-006",
+      "name": "Canyon Springs Retreat",
+      "property_type": "Resort",
+      "location": {
+        "city": "Sedona",
+        "state": "Arizona",
+        "area": "West Sedona",
+        "country": "USA"
+      },
+      "max_guests": 8,
+      "size_sqft": 2100,
+      "rating": 9.8,
+      "review_count": 91,
+      "price_from": 32500,
+      "currency": "BDT",
+      "amenities": [
+        "Pool",
+        "Mountain View",
+        "Parking"
+      ],
+      "provider_name": "Expedia",
+      "popularity_score": 92,
+      "eco_friendly": true,
+      "images": [
+        "https://images.unsplash.com/photo-1571896349842-33c89424de2d"
+      ]
+    },
+    {
+      "id": "prop-007",
+      "name": "Sunrise Bay Condo",
+      "property_type": "Condo",
+      "location": {
+        "city": "Miami Beach",
+        "state": "Florida",
+        "area": "South Beach",
+        "country": "USA"
+      },
+      "max_guests": 4,
+      "size_sqft": 950,
+      "rating": 9.4,
+      "review_count": 48,
+      "price_from": 21400,
+      "currency": "BDT",
+      "amenities": [
+        "Air Conditioning",
+        "Ocean View",
+        "Bedding/Linens"
+      ],
+      "provider_name": "Booking.com",
+      "popularity_score": 85,
+      "eco_friendly": false,
+      "images": [
+        "https://images.unsplash.com/photo-1600607687644-c7171b42498f"
+      ]
+    },
+    {
+      "id": "prop-008",
+      "name": "Tropical Shores Villa",
+      "property_type": "Villa",
+      "location": {
+        "city": "Honolulu",
+        "state": "Hawaii",
+        "area": "Waikiki",
+        "country": "USA"
+      },
+      "max_guests": 6,
+      "size_sqft": 1870,
+      "rating": 9.7,
+      "review_count": 114,
+      "price_from": 37800,
+      "currency": "BDT",
+      "amenities": [
+        "Ocean View",
+        "Balcony/Terrace",
+        "Pool"
+      ],
+      "provider_name": "Expedia",
+      "popularity_score": 96,
+      "eco_friendly": true,
+      "images": [
+        "https://images.unsplash.com/photo-1499793983690-e29da59ef1c2"
+      ]
+    },
+    {
+      "id": "prop-009",
+      "name": "Seaside Vista Residence",
+      "property_type": "House",
+      "location": {
+        "city": "Santa Monica",
+        "state": "California",
+        "area": "Ocean Park",
+        "country": "USA"
+      },
+      "max_guests": 8,
+      "size_sqft": 2400,
+      "rating": 9.9,
+      "review_count": 130,
+      "price_from": 42800,
+      "currency": "BDT",
+      "amenities": [
+        "Air Conditioning",
+        "Parking",
+        "Pool"
+      ],
+      "provider_name": "Booking.com",
+      "popularity_score": 98,
+      "eco_friendly": false,
+      "images": [
+        "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9"
+      ]
+    },
+    {
+      "id": "prop-010",
+      "name": "Lakeside Woodland Escape",
+      "property_type": "Cabin",
+      "location": {
+        "city": "Asheville",
+        "state": "North Carolina",
+        "area": "Blue Ridge",
+        "country": "USA"
+      },
+      "max_guests": 4,
+      "size_sqft": 1340,
+      "rating": 9.3,
+      "review_count": 41,
+      "price_from": 17450,
+      "currency": "BDT",
+      "amenities": [
+        "Mountain View",
+        "Parking",
+        "Bedding/Linens"
+      ],
+      "provider_name": "Expedia",
+      "popularity_score": 84,
+      "eco_friendly": true,
+      "images": [
+        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c"
+      ]
+    },
+    {
+      "id": "prop-011",
+      "name": "Downtown Boutique Loft",
+      "property_type": "Apartment",
+      "location": {
+        "city": "Austin",
+        "state": "Texas",
+        "area": "Downtown",
+        "country": "USA"
+      },
+      "max_guests": 2,
+      "size_sqft": 760,
+      "rating": 9.1,
+      "review_count": 55,
+      "price_from": 13600,
+      "currency": "BDT",
+      "amenities": [
+        "Air Conditioning",
+        "Wi-Fi",
+        "Bedding/Linens"
+      ],
+      "provider_name": "Booking.com",
+      "popularity_score": 80,
+      "eco_friendly": false,
+      "images": [
+        "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267"
+      ]
+    },
+    {
+      "id": "prop-012",
+      "name": "Modern Garden Villa",
+      "property_type": "Villa",
+      "location": {
+        "city": "San Diego",
+        "state": "California",
+        "area": "La Jolla",
+        "country": "USA"
+      },
+      "max_guests": 8,
+      "size_sqft": 2650,
+      "rating": 9.8,
+      "review_count": 87,
+      "price_from": 39600,
+      "currency": "BDT",
+      "amenities": [
+        "Garden",
+        "Air Conditioning",
+        "Parking"
+      ],
+      "provider_name": "Expedia",
+      "popularity_score": 93,
+      "eco_friendly": false,
+      "images": [
+        "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3"
+      ]
+    },
+    {
+      "id": "prop-013",
+      "name": "Cityside Comfort Suite",
+      "property_type": "Apartment",
+      "location": {
+        "city": "New York",
+        "state": "New York",
+        "area": "Manhattan",
+        "country": "USA"
+      },
+      "max_guests": 3,
+      "size_sqft": 810,
+      "rating": 9.2,
+      "review_count": 69,
+      "price_from": 19800,
+      "currency": "BDT",
+      "amenities": [
+        "Air Conditioning",
+        "Wi-Fi",
+        "Bedding/Linens"
+      ],
+      "provider_name": "Booking.com",
+      "popularity_score": 86,
+      "eco_friendly": false,
+      "images": [
+        "https://images.unsplash.com/photo-1493809842364-78817add7ffb"
+      ]
+    },
+    {
+      "id": "prop-014",
+      "name": "Sunset Lagoon Resort",
+      "property_type": "Resort",
+      "location": {
+        "city": "Naples",
+        "state": "Florida",
+        "area": "Vanderbilt Beach",
+        "country": "USA"
+      },
+      "max_guests": 6,
+      "size_sqft": 1940,
+      "rating": 9.7,
+      "review_count": 102,
+      "price_from": 34400,
+      "currency": "BDT",
+      "amenities": [
+        "Pool",
+        "Balcony/Terrace",
+        "Ocean View"
+      ],
+      "provider_name": "Expedia",
+      "popularity_score": 95,
+      "eco_friendly": true,
+      "images": [
+        "https://images.unsplash.com/photo-1566073771259-6a8506099945"
+      ]
+    },
+    {
+      "id": "prop-015",
+      "name": "Ocean Ridge Modern House",
+      "property_type": "House",
+      "location": {
+        "city": "Myrtle Beach",
+        "state": "South Carolina",
+        "area": "North Myrtle Beach",
+        "country": "USA"
+      },
+      "max_guests": 8,
+      "size_sqft": 2250,
+      "rating": 9.5,
+      "review_count": 74,
+      "price_from": 27800,
+      "currency": "BDT",
+      "amenities": [
+        "Air Conditioning",
+        "Pool",
+        "Parking"
+      ],
+      "provider_name": "Booking.com",
+      "popularity_score": 90,
+      "eco_friendly": false,
+      "images": [
+        "https://images.unsplash.com/photo-1580587771525-78b9dba3b914"
+      ]
+    }
+  ]
+}

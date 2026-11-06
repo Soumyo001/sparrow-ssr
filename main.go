@@ -13,36 +13,60 @@ import (
 
 func main() {
 	const contentRoot string = "content"
+	const mockRoot string = "mock_data"
 
-	// Existing single-deployment startup remains the default.
+	// Existing deployment configuration.
 	deploymentFiles := []string{"conf/deployment.json"}
 
-	// Optional, explicit comma-separated deployment metadata file paths.
 	if configured := os.Getenv("SPARROW_DEPLOYMENTS"); configured != "" {
 		deploymentFiles = strings.Split(configured, ",")
+
 		for i, file := range deploymentFiles {
 			deploymentFiles[i] = strings.TrimSpace(file)
 		}
 	}
 
-	catalog, err := services.NewMultiCatalog(contentRoot, deploymentFiles)
+	catalog, err := services.NewMultiCatalog(
+		contentRoot,
+		deploymentFiles,
+	)
 	if err != nil {
-		log.Fatalf("initialize site catalog: %v", err)
+		log.Fatalf(
+			"initialize site catalog: %v", err,
+		)
 	}
 
 	loader, err := services.NewContentLoader(contentRoot)
 	if err != nil {
-		log.Fatalf("initialize content loader: %v", err)
+		log.Fatalf(
+			"initialize content loader: %v", err,
+		)
+	}
+
+	propertySearch, err := services.NewPropertySearchService(mockRoot)
+
+	if err != nil {
+		log.Fatalf(
+			"initialize property search: %v", err,
+		)
 	}
 
 	routers.Register(catalog, loader)
+	routers.RegisterPropertyAPI(catalog, propertySearch)
 
 	beego.BConfig.WebConfig.ViewsPath = "views"
 
 	if err := beego.AddViewPath("views"); err != nil {
-		log.Fatalf("initialize HTML templates: %v", err)
+		log.Fatalf(
+			"initialize HTML templates: %v", err,
+		)
 	}
 
-	log.Printf("Catalog ready: %d pages from %d deployment(s)", catalog.Count(), len(deploymentFiles))
+	log.Printf(
+		"Catalog ready: %d pages from %d deployment(s)",
+		catalog.Count(),
+		len(deploymentFiles),
+	)
+
 	beego.Run("127.0.0.1:8080")
 }

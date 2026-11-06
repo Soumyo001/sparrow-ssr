@@ -41,7 +41,7 @@ func (c *PageController) Get() {
 		return
 	}
 
-	// STEP 1: Resolve the requested URL.
+	// Resolve the requested URL.
 	location, found := dependencies.catalog.Resolve(
 		c.Ctx.Request.Host,
 		c.Ctx.Request.URL.Path,
@@ -55,7 +55,7 @@ func (c *PageController) Get() {
 		return
 	}
 
-	// STEP 2: Load the corresponding JSON documents.
+	// Load the corresponding JSON documents.
 	content, err := dependencies.loader.Load(location)
 	if err != nil {
 		log.Printf(
@@ -69,7 +69,7 @@ func (c *PageController) Get() {
 		return
 	}
 
-	// STEP 3: Prepare template data.
+	// Prepare template data.
 	title := content.Page.Head.Title
 	if title == "" {
 		title = content.Header.SiteName
@@ -132,7 +132,7 @@ func (c *PageController) Get() {
 		content.Header.WidgetCode,
 	)
 
-	// STEP 4: Render the Beego HTML template.
+	// Render the Beego HTML template.
 	c.TplName = "page.tpl"
 
 	if err := c.Render(); err != nil {
