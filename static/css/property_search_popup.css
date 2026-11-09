@@ -1,6 +1,5 @@
 
-/* Homepage and shared-header search enhancement */
-
+/* Keep the original publisher's search layout and guest dropdown. */
 .sparrow-search-ready .datepicker-wrap,
 .sparrow-search-ready .guest-container {
     position: relative;
@@ -12,90 +11,6 @@
     cursor: pointer;
 }
 
-/* Native date range panel */
-
-.sparrow-search-ready .sparrow-date-panel[hidden] {
-    display: none !important;
-}
-
-.sparrow-search-ready .sparrow-date-panel {
-    position: absolute;
-    top: calc(100% + 8px);
-    left: 0;
-    z-index: 105;
-
-    display: flex;
-    flex-direction: column;
-    gap: 13px;
-
-    width: 290px;
-    max-width: calc(100vw - 40px);
-    padding: 18px;
-
-    background: white;
-    color: #092f37;
-    border: 1px solid #d5e1e4;
-    border-radius: 12px;
-
-    box-shadow: 0 12px 35px rgba(0, 0, 0, .18);
-}
-
-.sparrow-date-panel label {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-
-    font-size: 13px;
-    font-weight: 600;
-    color: #092f37;
-}
-
-/*
- * Match the publisher's date-input specificity.
- * Otherwise its 61px left padding also affects
- * the native date controls inside our new panel.
- */
-.sparrow-search-ready .sparrow-date-panel input[type="date"] {
-    display: block;
-    width: 100%;
-    min-height: 40px;
-    padding: 7px 10px;
-
-    border: 1px solid #c7d9dc;
-    border-radius: 7px;
-    background: white;
-    color: #092f37;
-
-    font-size: 14px;
-}
-
-.sparrow-date-actions {
-    display: flex;
-    gap: 10px;
-}
-
-.sparrow-date-actions button {
-    flex: 1;
-    width: auto;
-    min-height: 38px;
-    padding: 8px;
-
-    border: 1px solid #0a3540;
-    border-radius: 7px;
-    background: white;
-    color: #0a3540;
-
-    font-size: 13px;
-    cursor: pointer;
-}
-
-.sparrow-date-actions .sparrow-date-apply {
-    background: #0a3540;
-    color: white;
-}
-
-/* Existing guest panel becomes interactive */
-
 .sparrow-search-ready #search-guest-panel:not(.sparrow-open) {
     display: none !important;
 }
@@ -105,16 +20,13 @@
     top: calc(100% + 8px);
     left: 0;
     z-index: 105;
-
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
     pointer-events: auto !important;
-
     min-width: 250px;
     padding: 16px;
-
-    background: white;
+    background: #fff;
     color: #092f37;
     border: 1px solid #d5e1e4;
     border-radius: 12px;
@@ -131,22 +43,13 @@
     width: 65px;
     min-height: 36px;
     padding: 6px;
-
     border: 1px solid #c7d9dc;
     border-radius: 7px;
-    background: white;
+    background: #fff;
     color: #092f37;
-
     text-align: center;
     font-size: 15px;
 }
-
-/*
- * Keep the original publisher guest-nav styling.
- * Its pseudo-elements already draw the +/- buttons.
- */
-
-/* Feedback and keyboard accessibility */
 
 .sparrow-search-ready .sparrow-search-error[hidden] {
     display: none !important;
@@ -161,8 +64,267 @@
     line-height: 1.4;
 }
 
-.sparrow-search-ready input:focus-visible,
-.sparrow-search-ready button:focus-visible {
-    outline: 3px solid #368fc4;
-    outline-offset: 2px;
+/*
+ * Keep focus styling INSIDE the search fields.
+ * The previous outline extended over adjacent
+ * controls and outside the mobile search form.
+ */
+.sparrow-search-ready .property-search-content input:focus,
+.sparrow-search-ready .property-search-content button:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.sparrow-search-ready .property-search-content input:focus-visible,
+.sparrow-search-ready .property-search-content button:focus-visible {
+    box-shadow: inset 0 0 0 2px #bda85e !important;
+}
+
+.sparrow-search-ready .search-property-btn {
+    cursor: pointer;
+}
+
+.sparrow-search-ready .search-property-btn:hover {
+    filter: brightness(1.08);
+}
+
+/*
+ * Custom two-month calendar.
+ * Appended to document.body as a native modal dialog.
+ * Keep the dialog centered with visible side margins.
+ */
+.sparrow-range-dialog {
+    position: fixed;
+    inset: 0;
+    box-sizing: border-box;
+    width: min(600px, calc(100vw - 48px));
+    max-width: calc(100vw - 48px);
+    max-height: calc(100dvh - 48px);
+    margin: auto;
+    padding: 0;
+    overflow-y: auto;
+    border: 0;
+    border-radius: 12px;
+    background: #fff;
+    color: #092f37;
+    font-family: Arial, Helvetica, sans-serif;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, .28);
+}
+
+.sparrow-range-dialog::backdrop {
+    background: rgba(3, 17, 26, .58);
+}
+
+.sparrow-range-dialog,
+.sparrow-range-dialog * {
+    box-sizing: border-box;
+}
+
+.sparrow-range-surface {
+    padding: 22px 22px 18px;
+}
+
+.sparrow-range-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    padding: 0 36px 18px;
+}
+
+.sparrow-range-header h2 {
+    margin: 0;
+    color: #092f37;
+    font-size: 22px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.sparrow-range-dialog button {
+    cursor: pointer;
+    font: inherit;
+}
+
+.sparrow-range-close {
+    position: absolute;
+    right: 0;
+    top: -6px;
+    padding: 4px 8px;
+    border: 0;
+    background: none;
+    color: #092f37;
+    font-size: 30px !important;
+    line-height: 1;
+}
+
+.sparrow-range-toolbar {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) 34px;
+    gap: 8px;
+    align-items: start;
+}
+
+.sparrow-range-prev,
+.sparrow-range-next {
+    min-height: 32px;
+    padding: 0;
+    border: 1px solid #d5e1e4;
+    border-radius: 6px;
+    background: #fff;
+    color: #07343c;
+    font-size: 24px !important;
+}
+
+.sparrow-range-dialog button:disabled {
+    cursor: not-allowed;
+    opacity: .35;
+}
+
+.sparrow-range-months {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.sparrow-range-month {
+    min-width: 0;
+}
+
+.sparrow-range-month + .sparrow-range-month {
+    border-left: 1px solid #e3ebec;
+    padding-left: 18px;
+}
+
+.sparrow-range-month h3 {
+    margin: 3px 0 12px;
+    color: #092f37;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.sparrow-range-days {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 3px;
+    text-align: center;
+}
+
+.sparrow-range-weekday {
+    padding: 8px 0;
+    color: #52676b;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.sparrow-range-day {
+    min-width: 0;
+    min-height: 36px;
+    padding: 3px 0;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: #092f37;
+    font-size: 13px;
+}
+
+.sparrow-range-day:hover:not(:disabled) {
+    background: #deeeef;
+}
+
+.sparrow-range-day.sparrow-range-between {
+    background: #e3f4f3;
+    border-radius: 0;
+}
+
+.sparrow-range-day.sparrow-range-selected,
+.sparrow-range-day.sparrow-range-selected:hover {
+    background: #07343c;
+    color: #fff;
+}
+
+.sparrow-range-dialog button:focus-visible {
+    outline: 2px solid #bda85e;
+    outline-offset: 1px;
+}
+
+.sparrow-range-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #e3ebec;
+}
+
+.sparrow-range-summary {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.sparrow-range-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.sparrow-range-actions button {
+    min-height: 40px;
+    padding: 8px 18px;
+    border: 1px solid #07343c;
+    border-radius: 8px;
+    background: #fff;
+    color: #07343c;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.sparrow-range-actions .sparrow-range-apply {
+    background: #07343c;
+    color: #fff;
+}
+
+/*
+ * Small-screen layout.
+ * One month, centered, with horizontal margins.
+ */
+@media (max-width: 650px) {
+    .sparrow-range-dialog {
+        width: min(420px, calc(100vw - 36px));
+        max-width: calc(100vw - 36px);
+        max-height: calc(100dvh - 36px);
+    }
+
+    .sparrow-range-surface {
+        padding: 18px 12px 14px;
+    }
+
+    .sparrow-range-header h2 {
+        font-size: 18px;
+    }
+
+    .sparrow-range-months {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .sparrow-range-month:nth-child(2) {
+        display: none;
+    }
+
+    .sparrow-range-day {
+        min-height: 38px;
+    }
+
+    .sparrow-range-footer {
+        align-items: stretch;
+    }
+
+    .sparrow-range-actions {
+        width: 100%;
+    }
+
+    .sparrow-range-actions button {
+        flex: 1;
+    }
 }

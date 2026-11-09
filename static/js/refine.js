@@ -1,4 +1,3 @@
-
 (() => {
     "use strict";
 
@@ -162,6 +161,49 @@
         return "";
     }
 
+    // Accept only manually verified property-page links from the
+    // provider named on the listing. Never infer a URL from a name.
+    function allowedBookingURL(property) {
+        const raw = property.booking_url;
+
+        if (typeof raw !== "string" || !raw.trim()) {
+            return "";
+        }
+
+        const provider = String(
+            property.provider_name || ""
+        ).trim().toLowerCase();
+
+        const domainByProvider = {
+            "booking.com": "booking.com",
+            "expedia": "expedia.com",
+            "expedia.com": "expedia.com"
+        };
+
+        const domain = domainByProvider[provider];
+        if (!domain) return "";
+
+        try {
+            const url = new URL(raw.trim());
+            const hostname = url.hostname.toLowerCase();
+
+            const allowedHost =
+                hostname === domain ||
+                hostname.endsWith(`.${domain}`);
+
+            if (url.protocol !== "https:" ||
+                !allowedHost ||
+                url.username || url.password ||
+                url.port || url.pathname === "/") {
+                return "";
+            }
+
+            return url.href;
+        } catch {
+            return "";
+        }
+    }
+
     function showDialog(title, message) {
         elements.dialogTitle.textContent = title;
         elements.dialogMessage.textContent = message;
@@ -323,6 +365,16 @@
         availability.type = "button";
 
         availability.addEventListener("click", () => {
+            const bookingURL = allowedBookingURL(property);
+
+            if (bookingURL) {
+                // Navigate to the supplied provider URL.
+                // Its property identity must be verified separately.
+                // Dates and prices are not transferred here.
+                window.location.assign(bookingURL);
+                return;
+            }
+
             showDialog(
                 property.name,
                 "This is a demo listing. Live dates, prices, " +

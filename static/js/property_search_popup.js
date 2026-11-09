@@ -1,4 +1,3 @@
-
 (() => {
     "use strict";
 
@@ -36,59 +35,224 @@
     let selectedStart = "";
     let selectedEnd = "";
 
-    // The original readonly field displays the chosen
-    // dates. The new panel contains actual date inputs.
+    // Preserve the publisher's readonly date summary field.
+    // A native modal hosts an accessible two-month range calendar.
     dates.setAttribute("aria-haspopup", "dialog");
     dates.setAttribute("aria-expanded", "false");
     dates.setAttribute("role", "button");
     dates.tabIndex = 0;
 
-    const datePanel = document.createElement("div");
-    datePanel.className = "sparrow-date-panel";
-    datePanel.hidden = true;
-
-    datePanel.innerHTML = `
-        <label>
-            Check-in
-            <input type="date"
-                   class="sparrow-date-start"
-                   aria-label="Check-in date">
-        </label>
-
-        <label>
-            Checkout
-            <input type="date"
-                   class="sparrow-date-end"
-                   aria-label="Checkout date">
-        </label>
-
-        <div class="sparrow-date-actions">
-            <button type="button"
-                    class="sparrow-date-clear">
-                Clear
-            </button>
-
-            <button type="button"
-                    class="sparrow-date-apply">
-                Apply
-            </button>
+    const calendar = document.createElement("dialog");
+    calendar.className = "sparrow-range-dialog";
+    calendar.setAttribute("aria-labelledby", "sparrow-range-title");
+    calendar.innerHTML = `
+        <div class="sparrow-range-surface">
+            <div class="sparrow-range-header">
+                <h2 id="sparrow-range-title">When do you want to travel?</h2>
+                <button type="button" class="sparrow-range-close"
+                        aria-label="Close date calendar">×</button>
+            </div>
+            <div class="sparrow-range-toolbar">
+                <button type="button" class="sparrow-range-prev"
+                        aria-label="Previous month">‹</button>
+                <div class="sparrow-range-months"></div>
+                <button type="button" class="sparrow-range-next"
+                        aria-label="Next month">›</button>
+            </div>
+            <div class="sparrow-range-footer">
+                <span class="sparrow-range-summary" role="status"
+                      aria-live="polite"></span>
+                <div class="sparrow-range-actions">
+                    <button type="button" class="sparrow-range-clear">Clear</button>
+                    <button type="button" class="sparrow-range-apply">Continue</button>
+                </div>
+            </div>
         </div>
     `;
+    document.body.append(calendar);
 
-    dateWrap.append(datePanel);
+    const monthsRoot = calendar.querySelector(".sparrow-range-months");
+    const previousMonth = calendar.querySelector(".sparrow-range-prev");
+    const nextMonth = calendar.querySelector(".sparrow-range-next");
+    const summary = calendar.querySelector(".sparrow-range-summary");
+    const applyDates = calendar.querySelector(".sparrow-range-apply");
+    const clearDates = calendar.querySelector(".sparrow-range-clear");
 
-    const startInput = datePanel.querySelector(
-        ".sparrow-date-start"
-    );
-    const endInput = datePanel.querySelector(
-        ".sparrow-date-end"
-    );
-    const applyDates = datePanel.querySelector(
-        ".sparrow-date-apply"
-    );
-    const clearDates = datePanel.querySelector(
-        ".sparrow-date-clear"
-    );
+    const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    let pendingStart = "";
+    let pendingEnd = "";
+    let visibleMonth = new Date();
+    visibleMonth.setDate(1);
+
+    function isoDate(year, month, day) {
+        return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    }
+
+    function todayISO() {
+        const today = new Date();
+        return isoDate(today.getFullYear(), today.getMonth(), today.getDate());
+    }
+
+    function utcDayCount(start, end) {
+        const utc = (iso) => {
+            const [year, month, day] = iso.split("-").map(Number);
+            return Date.UTC(year, month - 1, day);
+        };
+        return Math.round((utc(end) - utc(start)) / 86400000);
+    }
+
+    function monthPanel(year, month) {
+        const section = document.createElement("section");
+        section.className = "sparrow-range-month";
+
+        const title = document.createElement("h3");
+        title.textContent = new Intl.DateTimeFormat("en-US", {
+            month: "long", year: "numeric"
+        }).format(new Date(year, month, 1));
+        section.append(title);
+
+        const grid = document.createElement("div");
+        grid.className = "sparrow-range-days";
+        section.append(grid);
+
+        for (const weekday of weekdays) {
+            const label = document.createElement("span");
+            label.className = "sparrow-range-weekday";
+            label.textContent = weekday;
+            grid.append(label);
+        }
+
+        const firstWeekday = new Date(year, month, 1).getDay();
+        for (let offset = 0; offset < firstWeekday; offset++) {
+            const empty = document.createElement("span");
+            empty.setAttribute("aria-hidden", "true");
+            grid.append(empty);
+        }
+
+        const days = new Date(year, month + 1, 0).getDate();
+        for (let day = 1; day <= days; day++) {
+            const iso = isoDate(year, month, day);
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "sparrow-range-day";
+            button.textContent = String(day);
+            button.dataset.date = iso;
+            button.disabled = iso < todayISO();
+            button.setAttribute("aria-label", new Intl.DateTimeFormat(
+                "en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }
+            ).format(new Date(year, month, day)));
+            button.setAttribute("aria-pressed", String(
+                iso === pendingStart || iso === pendingEnd
+            ));
+
+            if (iso === pendingStart || iso === pendingEnd) {
+                button.classList.add("sparrow-range-selected");
+            } else if (pendingStart && pendingEnd &&
+                       iso > pendingStart && iso < pendingEnd) {
+                button.classList.add("sparrow-range-between");
+            }
+
+            button.addEventListener("click", () => {
+                if (!pendingStart || pendingEnd || iso <= pendingStart) {
+                    pendingStart = iso;
+                    pendingEnd = "";
+                } else {
+                    pendingEnd = iso;
+                }
+                renderCalendar(iso);
+            });
+            grid.append(button);
+        }
+        return section;
+    }
+
+    function renderCalendar(focusISO = "") {
+        const year = visibleMonth.getFullYear();
+        const month = visibleMonth.getMonth();
+        const second = new Date(year, month + 1, 1);
+        monthsRoot.replaceChildren(
+            monthPanel(year, month),
+            monthPanel(second.getFullYear(), second.getMonth())
+        );
+
+        const today = new Date();
+        previousMonth.disabled =
+            year < today.getFullYear() ||
+            (year === today.getFullYear() && month <= today.getMonth());
+
+        applyDates.disabled = !pendingStart || !pendingEnd;
+
+        if (pendingStart && pendingEnd) {
+            const nights = utcDayCount(pendingStart, pendingEnd);
+            summary.textContent =
+                `${pendingStart} – ${pendingEnd} · ` +
+                `${nights} ${nights === 1 ? "night" : "nights"}`;
+        } else {
+            summary.textContent = pendingStart
+                ? "Now choose your checkout date"
+                : "Choose your check-in and checkout dates";
+        }
+
+        if (focusISO) {
+            const chosen = monthsRoot.querySelector(
+                `.sparrow-range-day[data-date="${focusISO}"]`
+            );
+            chosen?.focus();
+        }
+    }
+
+    function openDates() {
+        const today = new Date();
+        pendingStart = selectedStart;
+        pendingEnd = selectedEnd;
+        visibleMonth = pendingStart
+            ? new Date(`${pendingStart}T12:00:00`)
+            : new Date(today.getFullYear(), today.getMonth(), 1);
+        visibleMonth.setDate(1);
+        renderCalendar();
+        dates.setAttribute("aria-expanded", "true");
+        calendar.showModal();
+        calendar.querySelector(".sparrow-range-close").focus();
+    }
+
+    previousMonth.addEventListener("click", () => {
+        visibleMonth.setMonth(visibleMonth.getMonth() - 1);
+        renderCalendar();
+    });
+    nextMonth.addEventListener("click", () => {
+        visibleMonth.setMonth(visibleMonth.getMonth() + 1);
+        renderCalendar();
+    });
+    calendar.querySelector(".sparrow-range-close")
+        .addEventListener("click", () => calendar.close());
+
+    // Prevent publisher's document-level click/escape listeners
+    // from closing the underlying search popup while using the modal.
+    calendar.addEventListener("click", (event) => {
+        event.stopPropagation();
+        if (event.target === calendar) calendar.close();
+    });
+    calendar.addEventListener("keydown", event => event.stopPropagation());
+    calendar.addEventListener("close", () => {
+        dates.setAttribute("aria-expanded", "false");
+    });
+
+    applyDates.addEventListener("click", () => {
+        if (!pendingStart || !pendingEnd || pendingEnd <= pendingStart) return;
+        selectedStart = pendingStart;
+        selectedEnd = pendingEnd;
+        dates.value = `${formatDate(selectedStart)} – ${formatDate(selectedEnd)}`;
+        setError("");
+        calendar.close();
+    });
+
+    clearDates.addEventListener("click", () => {
+        selectedStart = "";
+        selectedEnd = "";
+        dates.value = "";
+        setError("");
+        calendar.close();
+    });
 
     // Retain the original count span for compatibility
     // with publisher code, but show an editable input.
@@ -140,7 +304,7 @@
     }
 
     function closeDates() {
-        datePanel.hidden = true;
+        if (calendar.open) calendar.close();
         dates.setAttribute("aria-expanded", "false");
     }
 
@@ -193,22 +357,12 @@
         return "";
     }
 
-    // Open the date panel using the original date field.
+    // Open the range calendar from the publisher's readonly input.
     dates.addEventListener("click", (event) => {
         event.preventDefault();
         event.stopImmediatePropagation();
-
-        const shouldOpen = datePanel.hidden;
-
         closeGuests();
-        datePanel.hidden = !shouldOpen;
-
-        dates.setAttribute(
-            "aria-expanded",
-            String(shouldOpen)
-        );
-
-        if (shouldOpen) startInput.focus();
+        if (!calendar.open) openDates();
     }, true);
 
     dates.addEventListener("keydown", (event) => {
@@ -246,42 +400,6 @@
             event.preventDefault();
             guestDisplay.click();
         }
-    });
-
-    // Commit selected dates.
-    applyDates.addEventListener("click", () => {
-        const start = startInput.value;
-        const end = endInput.value;
-
-        const message = validateDates(start, end);
-
-        if (message) {
-            setError(message);
-            return;
-        }
-
-        selectedStart = start;
-        selectedEnd = end;
-
-        dates.value = start && end
-            ? `${formatDate(start)} – ${formatDate(end)}`
-            : "";
-
-        setError("");
-        closeDates();
-    });
-
-    // Remove the date range.
-    clearDates.addEventListener("click", () => {
-        selectedStart = "";
-        selectedEnd = "";
-
-        startInput.value = "";
-        endInput.value = "";
-        dates.value = "";
-
-        setError("");
-        closeDates();
     });
 
     // Connect the original +/- buttons to the number input.

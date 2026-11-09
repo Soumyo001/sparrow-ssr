@@ -20,6 +20,7 @@ type Property struct {
 	Currency        string           `json:"currency"`
 	Amenities       []string         `json:"amenities"`
 	ProviderName    string           `json:"provider_name"`
+	BookingURL      string           `json:"booking_url,omitempty"`
 	PopularityScore int              `json:"popularity_score"`
 	EcoFriendly     bool             `json:"eco_friendly"`
 	Images          []string         `json:"images"`
