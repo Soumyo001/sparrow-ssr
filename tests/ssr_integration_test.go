@@ -234,6 +234,67 @@ func TestMultiSiteSSRHTTP(t *testing.T) {
 
 	routers.RegisterPropertyAPI(catalog, propertySearch)
 
+	t.Run("Health", func(t *testing.T) {
+		// Render may call /health using an unregistered
+		// onrender.com hostname, so the health endpoint
+		// must not require a published-site Host.
+		for _, host := range []string{
+			"alpha.example.com",
+			"unknown.example.com",
+		} {
+			recorder := requestPage(host, "/health")
+
+			if recorder.Code != http.StatusOK {
+				t.Fatalf(
+					"%s/health: expected 200, got %d: %s",
+					host,
+					recorder.Code,
+					recorder.Body.String(),
+				)
+			}
+
+			if !strings.HasPrefix(
+				recorder.Header().Get("Content-Type"),
+				"application/json",
+			) {
+				t.Errorf(
+					"%s: expected JSON content type",
+					host,
+				)
+			}
+
+			if recorder.Header().Get("Cache-Control") != "no-store" {
+				t.Errorf(
+					"%s: expected Cache-Control: no-store",
+					host,
+				)
+			}
+
+			var health struct {
+				Status   string `json:"status"`
+				API      string `json:"api"`
+				Frontend string `json:"frontend"`
+			}
+
+			if err := json.Unmarshal(
+				recorder.Body.Bytes(),
+				&health,
+			); err != nil {
+				t.Fatal(err)
+			}
+
+			if health.Status != "ok" ||
+				health.API != "ready" ||
+				health.Frontend != "ready" {
+				t.Errorf(
+					"%s: unexpected health response: %+v",
+					host,
+					health,
+				)
+			}
+		}
+	})
+
 	cases := []struct {
 		host        string
 		path        string

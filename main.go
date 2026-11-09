@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"os"
 	"strings"
@@ -9,16 +10,24 @@ import (
 	"sparrow-ssr/services"
 
 	beego "github.com/beego/beego/v2/server/web"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		if !errors.Is(err, os.ErrNotExist) {
+			log.Fatalf("load .env file: %v", err)
+		}
+	}
+
 	const contentRoot string = "content"
 	const mockRoot string = "mock_data"
 
 	// Existing deployment configuration.
 	deploymentFiles := []string{"conf/deployment.json"}
 
-	if configured := os.Getenv("SPARROW_DEPLOYMENTS"); configured != "" {
+	// Optionally override the deployment metadata files.
+	if configured := strings.TrimSpace(os.Getenv("SPARROW_DEPLOYMENTS")); configured != "" {
 		deploymentFiles = strings.Split(configured, ",")
 
 		for i, file := range deploymentFiles {
@@ -31,12 +40,13 @@ func main() {
 		deploymentFiles,
 	)
 	if err != nil {
-		log.Fatalf(
-			"initialize site catalog: %v", err,
-		)
+		log.Fatalf("initialize site catalog: %v", err)
 	}
 
-	loader, err := services.NewContentLoader(contentRoot)
+	// Initialize the frontend content loader.
+	loader, err := services.NewContentLoader(
+		contentRoot,
+	)
 	if err != nil {
 		log.Fatalf(
 			"initialize content loader: %v", err,
@@ -68,5 +78,17 @@ func main() {
 		len(deploymentFiles),
 	)
 
-	beego.Run("127.0.0.1:8080")
+	// Default local development address.
+	address := "127.0.0.1:8080"
+
+	// Render provides PORT as an environment variable.
+	// Bind to all interfaces so Render's proxy can reach
+	// the application.
+	if port := strings.TrimSpace(os.Getenv("PORT")); port != "" {
+		address = "0.0.0.0:" + port
+	}
+
+	log.Printf("Listening on %s", address)
+
+	beego.Run(address)
 }

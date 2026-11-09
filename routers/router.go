@@ -15,7 +15,22 @@ func Register(
 	controllers.SetDependencies(catalog, loader)
 
 	beego.Router("/", &controllers.PageController{})
-	beego.Router("/refine", &controllers.RefineController{}, "get:Get")
+
+	beego.Router(
+		"/refine",
+		&controllers.RefineController{},
+		"get:Get",
+	)
+
+	// Infrastructure health route.
+	// This deliberately does not resolve the request Host.
+	beego.Router(
+		"/health",
+		&controllers.HealthController{},
+		"get:Get",
+	)
+
+	// Preserve the existing publisher page routing.
 	beego.Router("/*", &controllers.PageController{})
 }
 
