@@ -45,6 +45,9 @@
     <link rel="stylesheet" href="{{.PageCSS}}">
     {{end}}
 
+    <!-- Local enhancements for the existing search popup -->
+    <link rel="stylesheet" href="/static/css/property_search_popup.css">
+
     <!-- Site widget provided by the publisher -->
     {{.WidgetHTML}}
 </head>
@@ -68,5 +71,8 @@
     {{if .PageJS}}
     <script src="{{.PageJS}}" defer></script>
     {{end}}
+
+    <!-- Search popup destination, dates and guests -->
+    <script src="/static/js/property_search_popup.js" defer></script>
 </body>
 </html>

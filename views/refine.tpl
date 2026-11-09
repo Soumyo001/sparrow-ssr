@@ -19,6 +19,8 @@
 
     <link rel="stylesheet" href="/static/css/refine.css">
 
+    <link rel="stylesheet" href="/static/css/property_search_popup.css">
+
     {{.WidgetHTML}}
 </head>
 
@@ -178,5 +180,7 @@
     {{end}}
 
     <script src="/static/js/refine.js" defer></script>
+
+    <script src="/static/js/property_search_popup.js" defer></script>
 </body>
 </html>

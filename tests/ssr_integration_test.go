@@ -287,6 +287,20 @@ func TestMultiSiteSSRHTTP(t *testing.T) {
 
 		body := recorder.Body.String()
 
+		for _, asset := range []string{
+			"/static/css/property_search_popup.css",
+			"/static/js/property_search_popup.js",
+		} {
+			if !strings.Contains(body, asset) {
+				t.Errorf(
+					"%s%s: missing search enhancement asset %q",
+					tc.host,
+					tc.path,
+					asset,
+				)
+			}
+		}
+
 		if !strings.Contains(body, tc.expected) {
 			t.Errorf("%s%s: expected content missing",
 				tc.host, tc.path)
@@ -680,6 +694,8 @@ func TestMultiSiteSSRHTTP(t *testing.T) {
 				`id="refine-grid"`,
 				`/static/css/refine.css`,
 				`/static/js/refine.js`,
+				`/static/css/property_search_popup.css`,
+				`/static/js/property_search_popup.js`,
 				"https://" + tc.host + "/refine",
 				tc.expected,
 			}

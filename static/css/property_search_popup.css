@@ -1,0 +1,168 @@
+
+/* Homepage and shared-header search enhancement */
+
+.sparrow-search-ready .datepicker-wrap,
+.sparrow-search-ready .guest-container {
+    position: relative;
+    overflow: visible !important;
+}
+
+.sparrow-search-ready .search-datepicker-input,
+.sparrow-search-ready .search-guest-input {
+    cursor: pointer;
+}
+
+/* Native date range panel */
+
+.sparrow-search-ready .sparrow-date-panel[hidden] {
+    display: none !important;
+}
+
+.sparrow-search-ready .sparrow-date-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 105;
+
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+
+    width: 290px;
+    max-width: calc(100vw - 40px);
+    padding: 18px;
+
+    background: white;
+    color: #092f37;
+    border: 1px solid #d5e1e4;
+    border-radius: 12px;
+
+    box-shadow: 0 12px 35px rgba(0, 0, 0, .18);
+}
+
+.sparrow-date-panel label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    font-size: 13px;
+    font-weight: 600;
+    color: #092f37;
+}
+
+/*
+ * Match the publisher's date-input specificity.
+ * Otherwise its 61px left padding also affects
+ * the native date controls inside our new panel.
+ */
+.sparrow-search-ready .sparrow-date-panel input[type="date"] {
+    display: block;
+    width: 100%;
+    min-height: 40px;
+    padding: 7px 10px;
+
+    border: 1px solid #c7d9dc;
+    border-radius: 7px;
+    background: white;
+    color: #092f37;
+
+    font-size: 14px;
+}
+
+.sparrow-date-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.sparrow-date-actions button {
+    flex: 1;
+    width: auto;
+    min-height: 38px;
+    padding: 8px;
+
+    border: 1px solid #0a3540;
+    border-radius: 7px;
+    background: white;
+    color: #0a3540;
+
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.sparrow-date-actions .sparrow-date-apply {
+    background: #0a3540;
+    color: white;
+}
+
+/* Existing guest panel becomes interactive */
+
+.sparrow-search-ready #search-guest-panel:not(.sparrow-open) {
+    display: none !important;
+}
+
+.sparrow-search-ready #search-guest-panel.sparrow-open {
+    position: absolute !important;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 105;
+
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+
+    min-width: 250px;
+    padding: 16px;
+
+    background: white;
+    color: #092f37;
+    border: 1px solid #d5e1e4;
+    border-radius: 12px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, .18);
+}
+
+.sparrow-search-ready .guest-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sparrow-search-ready .sparrow-guest-number {
+    width: 65px;
+    min-height: 36px;
+    padding: 6px;
+
+    border: 1px solid #c7d9dc;
+    border-radius: 7px;
+    background: white;
+    color: #092f37;
+
+    text-align: center;
+    font-size: 15px;
+}
+
+/*
+ * Keep the original publisher guest-nav styling.
+ * Its pseudo-elements already draw the +/- buttons.
+ */
+
+/* Feedback and keyboard accessibility */
+
+.sparrow-search-ready .sparrow-search-error[hidden] {
+    display: none !important;
+}
+
+.sparrow-search-ready .sparrow-search-error {
+    width: 100%;
+    max-width: 1041px;
+    margin: 10px auto 0;
+    color: #ffb4b4;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.sparrow-search-ready input:focus-visible,
+.sparrow-search-ready button:focus-visible {
+    outline: 3px solid #368fc4;
+    outline-offset: 2px;
+}
