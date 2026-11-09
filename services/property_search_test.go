@@ -39,35 +39,43 @@ func TestPropertySearchDemoData(t *testing.T) {
 		)
 	}
 
+	// The real-hotel demo ranks by review count.
+	// The two highest-ranking fixtures are now
+	// prop-002 and prop-003.
 	if all[0].ID != "prop-002" ||
-		all[1].ID != "prop-009" {
+		all[1].ID != "prop-003" {
 		t.Fatalf(
-			"incorrect popularity order: %q, %q",
+			"incorrect review-count order: %q, %q",
 			all[0].ID,
 			all[1].ID,
 		)
 	}
 
-	// Destination search is case-insensitive.
-	austin, err := service.Search(
+	// Destination search remains case-insensitive.
+	// The new catalog has a Beverly Hills hotel
+	// instead of the previous fictional Austin listing.
+	beverly, err := service.Search(
 		site,
 		PropertyFilters{
-			Search: "AuStIn",
+			Search: "BeVeRlY",
 			Pax:    2,
 			Order:  1,
 		},
 	)
 
 	if err != nil ||
-		len(austin) != 1 ||
-		austin[0].ID != "prop-011" {
+		len(beverly) != 1 ||
+		beverly[0].ID != "prop-007" {
 		t.Fatalf(
-			"Austin filter mismatch: %#v, err=%v",
-			austin, err,
+			"Beverly filter mismatch: %#v, err=%v",
+			beverly, err,
 		)
 	}
 
-	// Only properties supporting 8+ guests.
+	// Capacity is unknown for these real hotels.
+	// max_guests = 0 means unknown, not zero.
+	// The service retains these records instead
+	// of falsely excluding them by guest count.
 	large, err := service.Search(
 		site,
 		PropertyFilters{
@@ -77,9 +85,9 @@ func TestPropertySearchDemoData(t *testing.T) {
 		},
 	)
 
-	if err != nil || len(large) != 5 {
+	if err != nil || len(large) != 15 {
 		t.Fatalf(
-			"8-guest filter mismatch: %d listings, err=%v",
+			"8-guest unknown-capacity filter mismatch: %d listings, err=%v",
 			len(large), err,
 		)
 	}

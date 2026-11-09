@@ -109,7 +109,7 @@ func (c *PropertyAPIController) Get() {
 	// ContentDirectory, so we do not guess paths
 	// from the requested hostname.
 	location, found := propertyAPI.catalog.Resolve(
-		"test-travel-templates.beta.123presto.com",
+		c.Ctx.Request.Host,
 		"/",
 	)
 

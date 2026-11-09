@@ -135,7 +135,7 @@
                     Sort by
                     <select id="refine-sort">
                         <option value="popular">
-                            Most Popular
+                            Most Reviewed
                         </option>
                         <option value="price_low">
                             Price: Low to High

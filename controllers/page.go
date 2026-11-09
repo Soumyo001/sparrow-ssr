@@ -43,7 +43,7 @@ func (c *PageController) Get() {
 
 	// Resolve the requested URL.
 	location, found := dependencies.catalog.Resolve(
-		"test-travel-templates.beta.123presto.com",
+		c.Ctx.Request.Host,
 		c.Ctx.Request.URL.Path,
 	)
 

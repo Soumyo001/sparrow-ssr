@@ -165,8 +165,8 @@ func (s *PropertySearchService) Search(
 	results := make([]models.Property, 0, len(data.Properties))
 
 	for _, property := range data.Properties {
-		// Existing guest and destination filters.
-		if property.MaxGuests < filters.Pax || (query != "" && !matchesProperty(property, query)) {
+		if (property.MaxGuests > 0 && property.MaxGuests < filters.Pax) ||
+			(query != "" && !matchesProperty(property, query)) {
 			continue
 		}
 

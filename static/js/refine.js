@@ -129,15 +129,19 @@
     }
 
     function formatPrice(property) {
-        const amount = Number(
-            property.price_from
-        ).toLocaleString("en-BD");
+        const amount = Number(property.price_from);
 
-        if (property.currency === "BDT") {
-            return `৳${amount}`;
+        if (!Number.isFinite(amount) || amount <= 0) {
+            return "";
         }
 
-        return `${property.currency} ${amount}`;
+        const formatted = amount.toLocaleString("en-BD");
+
+        if (property.currency === "BDT") {
+            return `৳${formatted}`;
+        }
+
+        return `${property.currency} ${formatted}`;
     }
 
     function imageURL(property) {
@@ -250,11 +254,14 @@
             picture.append(fallback);
         }
 
+        const displayedPrice = formatPrice(property);
         picture.append(
             el(
                 "span",
                 "refine-price",
-                `From ${formatPrice(property)}`
+                displayedPrice
+                    ? `From ${displayedPrice}`
+                    : "Check provider for price"
             )
         );
 
@@ -392,16 +399,45 @@
 
     // Apply additional browser-side filters and sorting.
     function render() {
-        const ceiling = elements.maxPrice.value.trim();
-
+        const pricesAvailable = state.properties.some(
+            property => Number(property.price_from) > 0
+        );
+    
+        elements.maxPrice.disabled = !pricesAvailable;
+        elements.maxPrice.placeholder = pricesAvailable
+            ? "Any price"
+            : "Price unavailable";
+    
+        for (const value of ["price_low", "price_high"]) {
+            const option = elements.sort.querySelector(
+                `option[value="${value}"]`
+            );
+        
+            if (option) {
+                option.disabled = !pricesAvailable;
+            }
+        }
+    
+        if (!pricesAvailable) {
+            elements.sort.value = "popular";
+        }
+    
+        const ceiling = pricesAvailable
+            ? elements.maxPrice.value.trim()
+            : "";
+    
         const maxPrice = ceiling === ""
             ? Infinity
             : Math.max(0, Number(ceiling));
-
+    
         const poolOnly = elements.poolOnly.checked;
 
         const filtered = state.properties.filter(property => {
-            if (property.price_from > maxPrice) {
+            const price = Number(property.price_from);
+            if (maxPrice !== Infinity &&
+                (!Number.isFinite(price) ||
+                 price <= 0 ||
+                 price > maxPrice)) {
                 return false;
             }
 
@@ -438,8 +474,8 @@
         elements.grid.replaceChildren();
 
         elements.status.textContent =
-            `${filtered.length} of ` +
-            `${state.properties.length} properties shown`;
+            `${filtered.length} of ${state.properties.length} properties shown. ` +
+            `Demo date filtering only; confirm price, guests, and availability on the provider site.`;
 
         if (filtered.length === 0) {
             elements.grid.append(

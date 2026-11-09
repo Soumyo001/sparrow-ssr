@@ -26,7 +26,7 @@ func (c *RefineController) Get() {
 	// deployment catalog. The homepage provides
 	// the site's storage-relative file paths.
 	location, found := dependencies.catalog.Resolve(
-		"test-travel-templates.beta.123presto.com",
+		c.Ctx.Request.Host,
 		"/",
 	)
 	if !found {
