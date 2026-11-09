@@ -62,9 +62,7 @@ func ParseStayDates(
 
 	if start == "" || end == "" {
 		return time.Time{}, time.Time{},
-			fmt.Errorf(
-				"dateStart and dateEnd must both be provided",
-			)
+			fmt.Errorf("dateStart and dateEnd must both be provided")
 	}
 
 	checkIn, err := time.Parse("2006-01-02", start)

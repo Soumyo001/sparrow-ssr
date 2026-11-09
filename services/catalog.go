@@ -132,10 +132,7 @@ func NewCatalog(
 		"footer.json",
 	} {
 		if _, found := fileNames[shared]; !found {
-			return nil, fmt.Errorf(
-				"missing %s in deployment metadata",
-				shared,
-			)
+			return nil, fmt.Errorf("missing %s in deployment metadata", shared)
 		}
 	}
 
@@ -146,9 +143,7 @@ func NewCatalog(
 		return nil, err
 	}
 	if header.HeaderHTML == "" {
-		return nil, fmt.Errorf(
-			"header.json has an empty header",
-		)
+		return nil, fmt.Errorf("header.json has an empty header")
 	}
 
 	var footer models.SiteFooter
@@ -194,10 +189,7 @@ func NewCatalog(
 			canonical.RawQuery != "" ||
 			canonical.Fragment != "" ||
 			page.Body.Content == "" {
-			return nil, fmt.Errorf(
-				"invalid canonical page: %s",
-				relative,
-			)
+			return nil, fmt.Errorf("invalid canonical page: %s", relative)
 		}
 
 		publicPath := normalizePath(canonical.Path)
