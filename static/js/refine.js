@@ -128,20 +128,36 @@
         return node;
     }
 
-    function formatPrice(property) {
-        const amount = Number(property.price_from);
+    // Prefer actual pricing when present.
+    // Otherwise use explicitly illustrative demo pricing.
+    function priceAmount(property) {
+        const actual = Number(property.price_from);
 
-        if (!Number.isFinite(amount) || amount <= 0) {
+        if (Number.isFinite(actual) && actual > 0) {
+            return actual;
+        }
+
+        const demo = Number(property.demo_price_from);
+
+        if (Number.isFinite(demo) && demo > 0) {
+            return demo;
+        }
+
+        return 0;
+    }
+
+    function formatPrice(property) {
+        const amount = priceAmount(property);
+
+        if (amount === 0) {
             return "";
         }
 
         const formatted = amount.toLocaleString("en-BD");
 
-        if (property.currency === "BDT") {
-            return `৳${formatted}`;
-        }
-
-        return `${property.currency} ${formatted}`;
+        return property.currency === "BDT"
+            ? `৳${formatted}`
+            : `${property.currency} ${formatted}`;
     }
 
     function imageURL(property) {
@@ -255,12 +271,16 @@
         }
 
         const displayedPrice = formatPrice(property);
+        const demoPrice =
+            Number(property.price_from) <= 0 &&
+            Number(property.demo_price_from) > 0;
+
         picture.append(
             el(
                 "span",
                 "refine-price",
                 displayedPrice
-                    ? `From ${displayedPrice}`
+                    ? `${demoPrice ? "Demo from" : "From"} ${displayedPrice}`
                     : "Check provider for price"
             )
         );
@@ -333,6 +353,10 @@
             property.size_sqft
                 ? `${property.size_sqft} ft²`
                 : "",
+            property.demo_max_guests > 0 &&
+            property.max_guests <= 0
+                ? `Demo capacity: ${property.demo_max_guests} guests`
+                : "",
             property.property_type,
             ...(Array.isArray(property.amenities)
                 ? property.amenities
@@ -400,7 +424,7 @@
     // Apply additional browser-side filters and sorting.
     function render() {
         const pricesAvailable = state.properties.some(
-            property => Number(property.price_from) > 0
+            property => priceAmount(property) > 0
         );
     
         elements.maxPrice.disabled = !pricesAvailable;
@@ -433,7 +457,7 @@
         const poolOnly = elements.poolOnly.checked;
 
         const filtered = state.properties.filter(property => {
-            const price = Number(property.price_from);
+            const price = priceAmount(property);
             if (maxPrice !== Infinity &&
                 (!Number.isFinite(price) ||
                  price <= 0 ||
@@ -452,14 +476,14 @@
         switch (elements.sort.value) {
             case "price_low":
                 filtered.sort((a, b) =>
-                    a.price_from - b.price_from ||
+                    priceAmount(a) - priceAmount(b) ||
                     a.id.localeCompare(b.id)
                 );
                 break;
 
             case "price_high":
                 filtered.sort((a, b) =>
-                    b.price_from - a.price_from ||
+                    priceAmount(b) - priceAmount(a) ||
                     a.id.localeCompare(b.id)
                 );
                 break;
@@ -475,7 +499,7 @@
 
         elements.status.textContent =
             `${filtered.length} of ${state.properties.length} properties shown. ` +
-            `Demo date filtering only; confirm price, guests, and availability on the provider site.`;
+            `Demo sample prices and guest capacities only; confirm real details with the provider.`;
 
         if (filtered.length === 0) {
             elements.grid.append(

@@ -115,7 +115,7 @@
                     </details>
 
                     <label for="refine-max-price">
-                        Maximum Price (৳)
+                        Maximum sample price (USD)
                         <input id="refine-max-price"
                                type="number"
                                min="0"

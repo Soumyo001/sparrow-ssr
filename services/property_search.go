@@ -165,7 +165,16 @@ func (s *PropertySearchService) Search(
 	results := make([]models.Property, 0, len(data.Properties))
 
 	for _, property := range data.Properties {
-		if (property.MaxGuests > 0 && property.MaxGuests < filters.Pax) ||
+		// Use actual capacity when known.
+		// Otherwise, fall back to the illustrative
+		// capacity supplied for this demonstration.
+		capacity := property.MaxGuests
+
+		if capacity <= 0 {
+			capacity = property.DemoMaxGuests
+		}
+
+		if (capacity > 0 && capacity < filters.Pax) ||
 			(query != "" && !matchesProperty(property, query)) {
 			continue
 		}

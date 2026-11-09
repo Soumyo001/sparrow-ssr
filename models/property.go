@@ -13,10 +13,12 @@ type Property struct {
 	PropertyType    string           `json:"property_type"`
 	Location        PropertyLocation `json:"location"`
 	MaxGuests       int              `json:"max_guests"`
+	DemoMaxGuests   int              `json:"demo_max_guests,omitempty"`
 	SizeSqFt        int              `json:"size_sqft"`
 	Rating          float64          `json:"rating"`
 	ReviewCount     int              `json:"review_count"`
 	PriceFrom       int              `json:"price_from"`
+	DemoPriceFrom   int              `json:"demo_price_from,omitempty"`
 	Currency        string           `json:"currency"`
 	Amenities       []string         `json:"amenities"`
 	ProviderName    string           `json:"provider_name"`

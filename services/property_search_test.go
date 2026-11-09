@@ -85,10 +85,28 @@ func TestPropertySearchDemoData(t *testing.T) {
 		},
 	)
 
-	if err != nil || len(large) != 15 {
+	if err != nil || len(large) != 2 ||
+		large[0].ID != "prop-003" ||
+		large[1].ID != "prop-011" {
 		t.Fatalf(
-			"8-guest unknown-capacity filter mismatch: %d listings, err=%v",
-			len(large), err,
+			"8-guest demo capacity mismatch: %#v, err=%v",
+			large, err,
+		)
+	}
+
+	noLargeGroup, err := service.Search(
+		site,
+		PropertyFilters{
+			Search: "usa",
+			Pax:    20,
+			Order:  1,
+		},
+	)
+
+	if err != nil || len(noLargeGroup) != 0 {
+		t.Fatalf(
+			"20-guest demo capacity mismatch: %#v, err=%v",
+			noLargeGroup, err,
 		)
 	}
 
