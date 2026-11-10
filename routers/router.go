@@ -23,7 +23,7 @@ func Register(
 	)
 
 	// Infrastructure health route.
-	// This deliberately does not resolve the request Host.
+	// This does not resolve the request Host.
 	beego.Router(
 		"/health",
 		&controllers.HealthController{},
