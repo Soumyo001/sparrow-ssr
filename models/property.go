@@ -66,7 +66,7 @@ func (*LocationRecord) TableUnique() [][]string {
 type PropertyRecord struct {
 	Id              int64           `orm:"auto"`
 	Site            *SiteRecord     `orm:"rel(fk);on_delete(cascade)"`
-	Location        *LocationRecord `orm:"rel(fk);on_delete(cascade)"`
+	Location        *LocationRecord `orm:"rel(fk);on_delete(do_nothing)"`
 	PropertyID      string          `orm:"column(property_id);size(100)"`
 	Name            string          `orm:"size(512)"`
 	PropertyType    string          `orm:"size(100)"`
