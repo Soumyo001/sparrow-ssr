@@ -152,7 +152,23 @@ body.refine-route dialog.refine-filter-dialog::backdrop, body.refine-route dialo
 .refine-modal-check.disabled { opacity: .64; cursor: not-allowed; }
 .refine-modal-check input { flex: 0 0 auto; width: 18px; height: 18px; margin: 0; accent-color: #ff790b; }
 .refine-modal-action { cursor: pointer; font: 700 14px Arial,sans-serif; }
-.refine-modal-calendar-icon { background: #ff790b; border-radius: 4px; color: white; font-size: 20px; line-height: 1; padding: 3px 5px; }
+.refine-modal-calendar-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 26px;
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
+    background: #ff790b;
+    color: #fff;
+}
+
+.refine-modal-calendar-icon svg {
+    display: block;
+    width: 19px;
+    height: 19px;
+}
 .refine-modal-guests.is-highlighted, .refine-price-section.is-highlighted { outline: 2px solid #ff790b; outline-offset: -2px; }
 .refine-guest-controls { display: flex; align-items: center; gap: 12px; }
 .refine-guest-controls button { width: 22px; height: 22px; border: 0; border-radius: 3px; background: #ff790b; color: #fff; cursor: pointer; font-size: 20px; line-height: 20px; padding: 0; }

@@ -93,8 +93,27 @@
                     <span>🍃 Eco-friendly only</span>
                     <input id="refine-eco-only" type="checkbox">
                 </label>
-                <button type="button" id="refine-modal-dates" class="refine-modal-tile refine-modal-action">
-                    <span id="refine-modal-date-summary">Select a date</span><span class="refine-modal-calendar-icon" aria-hidden="true">▣</span>
+
+                <button type="button"
+                        id="refine-modal-dates"
+                        class="refine-modal-tile refine-modal-action">
+                    <span id="refine-modal-date-summary">Select a date</span>
+
+                    <span class="refine-modal-calendar-icon" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            width="19"
+                            height="19"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round">
+                            <rect x="3" y="5" width="18" height="16" rx="2"/>
+                            <path d="M7 3v4M17 3v4M3 10h18"/>
+                            <path d="m9 16 2 2 4-4"/>
+                        </svg>
+                    </span>
                 </button>
                 <div id="refine-guest-section" class="refine-modal-tile refine-modal-guests">
                     <span>Guests</span>
