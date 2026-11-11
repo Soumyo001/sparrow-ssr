@@ -39,7 +39,7 @@ func Register(
 // registration interface remains unchanged.
 func RegisterPropertyAPI(
 	catalog *services.Catalog,
-	search *services.PropertySearchService,
+	search services.PropertySearcher,
 ) {
 	controllers.SetPropertyAPIDependencies(
 		catalog,

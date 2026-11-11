@@ -21,7 +21,6 @@ func main() {
 	}
 
 	const contentRoot string = "content"
-	const mockRoot string = "mock_data"
 
 	// Existing deployment configuration.
 	deploymentFiles := []string{"conf/deployment.json"}
@@ -53,13 +52,16 @@ func main() {
 		)
 	}
 
-	propertySearch, err := services.NewPropertySearchService(mockRoot)
-
-	if err != nil {
-		log.Fatalf(
-			"initialize property search: %v", err,
-		)
+	databaseURL := strings.TrimSpace(os.Getenv("DATABASE_URL_POOLED"))
+	if databaseURL == "" {
+		databaseURL = strings.TrimSpace(os.Getenv("DATABASE_URL"))
 	}
+
+	if err := services.InitPropertyDatabase(databaseURL); err != nil {
+		log.Fatalf("initialize PostgreSQL: %v", err)
+	}
+
+	propertySearch := services.NewDatabasePropertySearchService()
 
 	routers.Register(catalog, loader)
 	routers.RegisterPropertyAPI(catalog, propertySearch)

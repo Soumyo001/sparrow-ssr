@@ -16,14 +16,14 @@ import (
 // the application starts accepting requests.
 type propertyAPIDependencies struct {
 	catalog *services.Catalog
-	search  *services.PropertySearchService
+	search  services.PropertySearcher
 }
 
 var propertyAPI propertyAPIDependencies
 
 func SetPropertyAPIDependencies(
 	catalog *services.Catalog,
-	search *services.PropertySearchService,
+	search services.PropertySearcher,
 ) {
 	propertyAPI = propertyAPIDependencies{
 		catalog: catalog,
