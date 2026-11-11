@@ -1,663 +1,414 @@
+
 (() => {
     "use strict";
 
     const app = document.getElementById("refine-app");
     if (!app) return;
 
-    const elements = {
-        searchForm: document.getElementById("refine-search-form"),
-        destination: document.getElementById("refine-destination"),
-        guests: document.getElementById("refine-guests"),
-        headingDestination: document.getElementById("refine-heading-destination"),
-        breadcrumbDestination: document.getElementById("refine-breadcrumb-destination"),
-        maxPrice: document.getElementById("refine-max-price"),
-        poolOnly: document.getElementById("refine-pool-only"),
-        sort: document.getElementById("refine-sort"),
-        dates: document.getElementById("refine-dates"),
-        dateDropdown: document.getElementById("refine-date-dropdown"),
-        dateStart: document.getElementById("refine-date-start"),
-        dateEnd: document.getElementById("refine-date-end"),
-        dateApply: document.getElementById("refine-date-apply"),
-        dateClear: document.getElementById("refine-date-clear"),
-        status: document.getElementById("refine-status"),
-        grid: document.getElementById("refine-grid"),
-        dialog: document.getElementById("refine-dialog"),
-        dialogTitle: document.getElementById("refine-dialog-title"),
-        dialogMessage: document.getElementById("refine-dialog-message"),
-        closeDialog: document.getElementById("refine-dialog-close")
+    const $ = id => document.getElementById(id);
+    const ui = {
+        heading: $("refine-heading-destination"), breadcrumb: $("refine-breadcrumb-destination"),
+        grid: $("refine-grid"), status: $("refine-status"), sort: $("refine-sort"),
+        filter: $("refine-filter-dialog"), filterClose: $("refine-filter-close"),
+        filterClear: $("refine-filter-clear"), filterSearch: $("refine-filter-search"),
+        eco: $("refine-eco-only"), modalDates: $("refine-modal-dates"),
+        modalDateSummary: $("refine-modal-date-summary"),
+        guestSection: $("refine-guest-section"), guestNumber: $("refine-guest-number"),
+        guestMinus: $("refine-guest-minus"), guestPlus: $("refine-guest-plus"),
+        priceSection: $("refine-price-section"), priceMin: $("refine-min-price"),
+        priceMax: $("refine-max-price"), rangeMin: $("refine-range-min"),
+        rangeMax: $("refine-range-max"), rangeTrack: $("refine-range-track"),
+        currencyMin: $("refine-price-currency-min"), currencyMax: $("refine-price-currency-max"),
+        amenities: $("refine-amenities-grid"),
+        calendar: $("refine-calendar-dialog"), calendarClose: $("refine-calendar-close"),
+        calendarHint: $("refine-calendar-hint"), calendarMonths: $("refine-calendar-months"),
+        monthPrev: $("refine-month-prev"), monthNext: $("refine-month-next"),
+        calendarClear: $("refine-calendar-clear"), calendarApply: $("refine-calendar-apply"),
+        message: $("refine-dialog"), messageTitle: $("refine-dialog-title"),
+        messageText: $("refine-dialog-message"), messageClose: $("refine-dialog-close")
     };
 
     const state = {
-        search: "",
-        pax: 2,
-        dateStart: "",
-        dateEnd: "",
-        properties: [],
+        search: "", pax: 2, dateStart: "", dateEnd: "", properties: [],
+        priceMin: null, priceMax: null, eco: false, amenities: new Set(),
         favorites: new Set()
     };
-
+    let draft = null;
     let latestRequest = 0;
+    let calendarOrigin = "standalone";
+    let chosenStart = "", chosenEnd = "", visibleMonth = new Date();
 
-    // Read the search criteria from the browser URL.
-    function readURL() {
-        const params = new URLSearchParams(window.location.search);
-
+    function node(tag, className = "", text = undefined) {
+        const n = document.createElement(tag);
+        if (className) n.className = className;
+        if (text !== undefined) n.textContent = String(text);
+        return n;
+    }
+    function parseURL() {
+        const params = new URLSearchParams(location.search);
         state.search = (params.get("search") || "").trim();
-
-        const pax = Number(params.get("pax") || "2");
-        state.pax =
-            Number.isInteger(pax) && pax >= 1 && pax <= 20
-                ? pax
-                : 2;
-
-        elements.destination.value = state.search;
-        elements.guests.value = String(state.pax);
-
+        const pax = Number(params.get("pax") || 2);
+        state.pax = Number.isInteger(pax) && pax >= 1 && pax <= 20 ? pax : 2;
         state.dateStart = params.get("dateStart") || "";
         state.dateEnd = params.get("dateEnd") || "";
-
-        elements.dateStart.value = state.dateStart;
-        elements.dateEnd.value = state.dateEnd;
-
-        updateDateSummary();
-
         const name = state.search || "your destination";
-
-        elements.headingDestination.textContent = name;
-        elements.breadcrumbDestination.textContent = name;
+        ui.heading.textContent = name;
+        ui.breadcrumb.textContent = name;
+        updatePills();
     }
-
-    function formatDateLabel(isoDate) {
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(isoDate)) {
-            return isoDate;
-        }
-
-        const date = new Date(`${isoDate}T00:00:00Z`);
-
-        if (Number.isNaN(date.getTime())) {
-            return isoDate;
-        }
-
-        return date.toLocaleDateString("en-US", {
-            month: "short",
-            day: "2-digit",
-            timeZone: "UTC"
-        });
-    }
-
-    function updateDateSummary() {
-        elements.dates.textContent =
-            state.dateStart && state.dateEnd
-                ? `${formatDateLabel(state.dateStart)} – ` +
-                  `${formatDateLabel(state.dateEnd)}`
-                : "Dates";
-    }
-
-    // Update the page URL without a full reload.
     function updateURL() {
-        const params = new URLSearchParams({
-            search: state.search,
-            pax: String(state.pax),
-            order: "1"
-        });
-
+        const params = new URLSearchParams({ search: state.search, pax: String(state.pax), order: "1" });
         if (state.dateStart && state.dateEnd) {
             params.set("dateStart", state.dateStart);
             params.set("dateEnd", state.dateEnd);
         }
-
-        window.history.pushState(
-            {},
-            "",
-            `/refine?${params.toString()}`
-        );
+        history.pushState({}, "", `/refine?${params.toString()}`);
     }
-
-    // Create DOM nodes safely using textContent.
-    function el(tag, className, text) {
-        const node = document.createElement(tag);
-
-        if (className) {
-            node.className = className;
-        }
-
-        if (text !== undefined) {
-            node.textContent = String(text);
-        }
-
-        return node;
+    function updatePills() {
+        const active = {
+            dates: Boolean(state.dateStart && state.dateEnd),
+            price: state.priceMin !== null || state.priceMax !== null,
+            guests: state.pax !== 2,
+            more: state.eco || state.amenities.size > 0
+        };
+        document.querySelectorAll("[data-filter-open]").forEach(button => {
+            button.setAttribute("aria-pressed", String(active[button.dataset.filterOpen]));
+        });
     }
-
-    // Database prices use the regular public API field.
-    function priceAmount(property) {
-        const amount = Number(property.price_from);
-
-        return Number.isFinite(amount) && amount > 0
-            ? amount
-            : 0;
+    function priceAmount(p) {
+        const n = Number(p.price_from);
+        return Number.isFinite(n) && n > 0 ? n : 0;
     }
-
-    function formatPrice(property) {
-        const amount = priceAmount(property);
-
-        if (amount === 0) {
-            return "";
-        }
-
-        const formatted = amount.toLocaleString("en-BD");
-
-        return property.currency === "BDT"
-            ? `৳${formatted}`
-            : `${property.currency} ${formatted}`;
+    function priceLabel(p) {
+        const amount = priceAmount(p);
+        if (!amount) return "";
+        return p.currency === "BDT"
+            ? `৳${amount.toLocaleString("en-US")}`
+            : `${p.currency || ""} ${amount.toLocaleString("en-US")}`.trim();
     }
-
+    function priceBounds() {
+        const values = state.properties.map(priceAmount).filter(n => n > 0);
+        const low = values.length ? Math.floor(Math.min(...values)) : 0;
+        const high = values.length ? Math.ceil(Math.max(...values)) : 100;
+        const currencies = new Set(state.properties.map(p => p.currency).filter(Boolean));
+        const currency = currencies.size === 1 ? [...currencies][0] : "USD";
+        return { low, high: Math.max(low + 1, high), currency };
+    }
     function imageURL(property) {
-        const raw = Array.isArray(property.images)
-            ? property.images[0]
-            : "";
-
-        if (!raw) return "";
-
+        const raw = Array.isArray(property.images) ? property.images[0] : "";
+        if (typeof raw !== "string" || !raw) return "";
         try {
             const url = new URL(raw);
-
-            if (url.protocol === "https:" ||
-                url.protocol === "http:") {
-                return url.href;
-            }
-        } catch {
-            return "";
-        }
-
-        return "";
+            return url.protocol === "https:" || url.protocol === "http:" ? url.href : "";
+        } catch { return ""; }
     }
-
-    // Accept only manually verified property-page links from the
-    // provider named on the listing. Never infer a URL from a name.
-    function allowedBookingURL(property) {
+    function bookingURL(property) {
         const raw = property.booking_url;
-
-        if (typeof raw !== "string" || !raw.trim()) {
-            return "";
-        }
-
-        const provider = String(
-            property.provider_name || ""
-        ).trim().toLowerCase();
-
-        const domainByProvider = {
-            "booking.com": "booking.com",
-            "expedia": "expedia.com",
-            "expedia.com": "expedia.com"
-        };
-
-        const domain = domainByProvider[provider];
+        if (typeof raw !== "string" || !raw.trim()) return "";
+        const domains = { "booking.com": "booking.com", "expedia": "expedia.com", "expedia.com": "expedia.com" };
+        const domain = domains[String(property.provider_name || "").trim().toLowerCase()];
         if (!domain) return "";
-
         try {
             const url = new URL(raw.trim());
-            const hostname = url.hostname.toLowerCase();
-
-            const allowedHost =
-                hostname === domain ||
-                hostname.endsWith(`.${domain}`);
-
+            const host = url.hostname.toLowerCase();
             if (url.protocol !== "https:" ||
-                !allowedHost ||
-                url.username || url.password ||
-                url.port || url.pathname === "/") {
-                return "";
-            }
-
+                !(host === domain || host.endsWith(`.${domain}`)) ||
+                url.username || url.password || url.port || url.pathname === "/") return "";
             return url.href;
-        } catch {
-            return "";
-        }
+        } catch { return ""; }
     }
-
-    function showDialog(title, message) {
-        elements.dialogTitle.textContent = title;
-        elements.dialogMessage.textContent = message;
-
-        if (typeof elements.dialog.showModal === "function") {
-            elements.dialog.showModal();
-        } else {
-            window.alert(`${title}\n\n${message}`);
-        }
+    function showMessage(title, message) {
+        ui.messageTitle.textContent = title;
+        ui.messageText.textContent = message;
+        ui.message.showModal();
     }
-
-    // Construct one property card from one API object.
     function propertyCard(property) {
-        const card = el("article", "refine-card");
-        const picture = el("div", "refine-card-picture");
-
-        const fallback = el(
-            "div",
-            "refine-image-fallback",
-            "Photo unavailable"
-        );
-
-        const photo = imageURL(property);
-
-        if (photo) {
-            const img = el("img", "refine-card-image");
-
-            img.src = photo;
-            img.alt =
-                `Illustrative accommodation photograph for ${property.name}`;
+        const card = node("article", "refine-card");
+        const picture = node("div", "refine-card-picture");
+        const fallback = node("div", "refine-image-fallback", "Photo unavailable");
+        const photoURL = imageURL(property);
+        if (photoURL) {
+            const img = node("img", "refine-card-image");
+            img.src = photoURL;
+            img.alt = `Illustrative accommodation photograph for ${property.name}`;
             img.loading = "lazy";
-
-            img.addEventListener(
-                "error",
-                () => {
-                    img.remove();
-                    picture.append(fallback);
-                },
-                { once: true }
-            );
-
+            img.addEventListener("error", () => { img.remove(); picture.prepend(fallback); }, { once: true });
             picture.append(img);
-        } else {
-            picture.append(fallback);
-        }
+        } else picture.append(fallback);
 
-        const displayedPrice = formatPrice(property);
-        picture.append(
-            el(
-                "span",
-                "refine-price",
-                displayedPrice
-                    ? `From ${displayedPrice}`
-                    : "Check provider for price"
-            )
-        );
-
-        if (property.eco_friendly) {
-            picture.append(
-                el("span", "refine-eco", "Eco")
-            );
-        }
-
-        // Favorites are kept in browser memory only.
-        const favorite = el(
-            "button",
-            "refine-favorite",
-            state.favorites.has(property.id) ? "♥" : "♡"
-        );
-
-        favorite.type = "button";
-        favorite.setAttribute(
-            "aria-label",
-            `Favorite ${property.name}`
-        );
-        favorite.setAttribute(
-            "aria-pressed",
-            String(state.favorites.has(property.id))
-        );
-
-        favorite.addEventListener("click", () => {
-            if (state.favorites.has(property.id)) {
-                state.favorites.delete(property.id);
-            } else {
-                state.favorites.add(property.id);
-            }
-
-            const selected = state.favorites.has(property.id);
-
-            favorite.textContent = selected ? "♥" : "♡";
-            favorite.setAttribute(
-                "aria-pressed",
-                String(selected)
-            );
+        picture.append(node("span", "refine-price", priceLabel(property) ? `From ${priceLabel(property)}` : "Check provider for price"));
+        if (property.eco_friendly) picture.append(node("span", "refine-eco", "Eco"));
+        const fav = node("button", "refine-favorite", state.favorites.has(property.id) ? "♥" : "♡");
+        fav.type = "button";
+        fav.setAttribute("aria-label", `Favorite ${property.name}`);
+        fav.setAttribute("aria-pressed", String(state.favorites.has(property.id)));
+        fav.addEventListener("click", () => {
+            if (state.favorites.has(property.id)) state.favorites.delete(property.id);
+            else state.favorites.add(property.id);
+            fav.textContent = state.favorites.has(property.id) ? "♥" : "♡";
+            fav.setAttribute("aria-pressed", String(state.favorites.has(property.id)));
         });
+        picture.append(fav);
 
-        picture.append(favorite);
-
-        const body = el("div", "refine-card-body");
-        const meta = el("div", "refine-card-meta");
-
-        meta.append(
-            el(
-                "span",
-                "refine-rating",
-                `● ${Number(property.rating).toFixed(1)} ` +
-                `(${property.review_count} Reviews)`
-            ),
-            el(
-                "span",
-                "refine-property-type",
-                property.property_type
-            )
-        );
-
-        body.append(meta);
-
-        body.append(
-            el("h2", "refine-card-title", property.name)
-        );
-
-        const details = [
-            property.size_sqft
-                ? `${property.size_sqft} ft²`
-                : "",
-            property.property_type,
-            ...(Array.isArray(property.amenities)
-                ? property.amenities
-                : [])
-        ].filter(Boolean).join(" · ");
-
-        body.append(
-            el("p", "refine-card-details", details)
-        );
-
-        const location = [
-            property.location?.city,
-            property.location?.area,
-            property.location?.state
-        ].filter(Boolean).join(" › ");
-
-        body.append(
-            el("p", "refine-card-location", location)
-        );
-
-        const bottom = el("div", "refine-card-bottom");
-
-        bottom.append(
-            el(
-                "span",
-                "refine-provider",
-                property.provider_name
-            )
-        );
-
-        const availability = el(
-            "button",
-            "refine-availability",
-            "View Availability"
-        );
-
-        availability.type = "button";
-
-        availability.addEventListener("click", () => {
-            const bookingURL = allowedBookingURL(property);
-
-            if (bookingURL) {
-                // Navigate to the supplied provider URL.
-                // Its property identity must be verified separately.
-                // Dates and prices are not transferred here.
-                window.location.assign(bookingURL);
-                return;
-            }
-
-            showDialog(
-                property.name,
-                "This is a demo listing. Live dates, prices, " +
-                "booking links and availability are not connected."
-            );
+        const body = node("div", "refine-card-body");
+        const meta = node("div", "refine-card-meta");
+        const rating = node("span", "refine-rating");
+        rating.append(node("span", "refine-rating-icon", "●"));
+        rating.append(document.createTextNode(`${Number(property.rating || 0).toFixed(1)} (${property.review_count || 0} Reviews)`));
+        meta.append(rating, node("span", "refine-property-type", property.property_type || ""));
+        body.append(meta, node("h2", "refine-card-title", property.name));
+        const details = [property.size_sqft > 0 ? `${property.size_sqft} ft²` : "", property.property_type,
+            ...(Array.isArray(property.amenities) ? property.amenities : [])].filter(Boolean).join(" · ");
+        body.append(node("p", "refine-card-details", details));
+        const loc = property.location || {};
+        body.append(node("p", "refine-card-location", [loc.city, loc.area, loc.state].filter(Boolean).join(" › ")));
+        const bottom = node("div", "refine-card-bottom");
+        const view = node("button", "refine-availability", "View Availability");
+        view.type = "button";
+        view.addEventListener("click", () => {
+            const dest = bookingURL(property);
+            if (dest) location.assign(dest);
+            else showMessage(property.name, "Live booking information is not connected for this listing. Check with the provider.");
         });
-
-        bottom.append(availability);
+        bottom.append(node("span", "refine-provider", property.provider_name || ""), view);
         body.append(bottom);
-
         card.append(picture, body);
-
         return card;
     }
-
-    // Apply additional browser-side filters and sorting.
     function render() {
-        const pricesAvailable = state.properties.some(
-            property => priceAmount(property) > 0
-        );
-    
-        elements.maxPrice.disabled = !pricesAvailable;
-        elements.maxPrice.placeholder = pricesAvailable
-            ? "Any price"
-            : "Price unavailable";
-    
-        for (const value of ["price_low", "price_high"]) {
-            const option = elements.sort.querySelector(
-                `option[value="${value}"]`
-            );
-        
-            if (option) {
-                option.disabled = !pricesAvailable;
-            }
-        }
-    
-        if (!pricesAvailable) {
-            elements.sort.value = "popular";
-        }
-    
-        const ceiling = pricesAvailable
-            ? elements.maxPrice.value.trim()
-            : "";
-    
-        const maxPrice = ceiling === ""
-            ? Infinity
-            : Math.max(0, Number(ceiling));
-    
-        const poolOnly = elements.poolOnly.checked;
-
-        const filtered = state.properties.filter(property => {
-            const price = priceAmount(property);
-            if (maxPrice !== Infinity &&
-                (!Number.isFinite(price) ||
-                 price <= 0 ||
-                 price > maxPrice)) {
-                return false;
-            }
-
-            if (poolOnly &&
-                !property.amenities?.includes("Pool")) {
-                return false;
-            }
-
+        updatePills();
+        const results = state.properties.filter(p => {
+            const price = priceAmount(p);
+            if (state.priceMin !== null && (!price || price < state.priceMin)) return false;
+            if (state.priceMax !== null && (!price || price > state.priceMax)) return false;
+            if (state.eco && !p.eco_friendly) return false;
+            if (![...state.amenities].every(a => Array.isArray(p.amenities) && p.amenities.includes(a))) return false;
             return true;
         });
-
-        switch (elements.sort.value) {
-            case "price_low":
-                filtered.sort((a, b) =>
-                    priceAmount(a) - priceAmount(b) ||
-                    a.id.localeCompare(b.id)
-                );
-                break;
-
-            case "price_high":
-                filtered.sort((a, b) =>
-                    priceAmount(b) - priceAmount(a) ||
-                    a.id.localeCompare(b.id)
-                );
-                break;
-
-            default:
-                filtered.sort((a, b) =>
-                    b.popularity_score - a.popularity_score ||
-                    a.id.localeCompare(b.id)
-                );
-        }
-
-        elements.grid.replaceChildren();
-
-        elements.status.textContent =
-            `${filtered.length} of ${state.properties.length} properties shown. ` +
-            `Demo sample prices and guest capacities only; confirm real details with the provider.`;
-
-        if (filtered.length === 0) {
-            elements.grid.append(
-                el(
-                    "p",
-                    "refine-empty",
-                    "No properties match your search or filters."
-                )
-            );
-            return;
-        }
-
+        if (ui.sort.value === "price_low") results.sort((a,b) => priceAmount(a) - priceAmount(b) || a.id.localeCompare(b.id));
+        else if (ui.sort.value === "price_high") results.sort((a,b) => priceAmount(b) - priceAmount(a) || a.id.localeCompare(b.id));
+        else results.sort((a,b) => Number(b.popularity_score) - Number(a.popularity_score) || a.id.localeCompare(b.id));
         const fragment = document.createDocumentFragment();
-
-        filtered.forEach(property => {
-            fragment.append(propertyCard(property));
-        });
-
-        elements.grid.append(fragment);
+        if (!results.length) fragment.append(node("p", "refine-empty", "No properties match your search or filters."));
+        else results.forEach(p => fragment.append(propertyCard(p)));
+        ui.grid.replaceChildren(fragment);
+        ui.status.textContent = `${results.length} of ${state.properties.length} properties shown`;
+        ui.status.classList.remove("is-visible");
     }
-
-    // Request JSON from the verified Beego endpoint.
     async function load() {
-        const currentRequest = ++latestRequest;
-
-        elements.status.textContent = "Loading properties...";
-        elements.grid.replaceChildren();
-
-        const params = new URLSearchParams({
-            search: state.search,
-            pax: String(state.pax),
-            order: "1"
-        });
-
+        const request = ++latestRequest;
+        ui.status.textContent = "Loading properties...";
+        ui.status.classList.add("is-visible");
+        ui.grid.replaceChildren();
+        const params = new URLSearchParams({ search: state.search, pax: String(state.pax), order: "1" });
         if (state.dateStart || state.dateEnd) {
             params.set("dateStart", state.dateStart);
             params.set("dateEnd", state.dateEnd);
         }
-
         try {
-            const response = await fetch(
-                `/api/properties?${params.toString()}`,
-                {
-                    headers: {
-                        Accept: "application/json"
-                    }
-                }
-            );
-
+            const response = await fetch(`/api/properties?${params}`, { headers: { Accept: "application/json" } });
             const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(
-                    data.error || `HTTP ${response.status}`
-                );
-            }
-
-            if (!Array.isArray(data.properties)) {
-                throw new Error("Unexpected API response");
-            }
-
-            // Ignore responses from older requests.
-            if (currentRequest !== latestRequest) {
-                return;
-            }
-
+            if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
+            if (!Array.isArray(data.properties)) throw new Error("Unexpected API response");
+            if (request !== latestRequest) return;
             state.properties = data.properties;
             render();
-
-        } catch (error) {
-            if (currentRequest !== latestRequest) {
-                return;
-            }
-
-            elements.status.textContent =
-                `Unable to load properties: ${error.message}`;
+        } catch (err) {
+            if (request !== latestRequest) return;
+            ui.status.textContent = `Unable to load properties: ${err.message}`;
+            ui.status.classList.add("is-visible");
         }
     }
 
-    // New destination search.
-    elements.searchForm.addEventListener(
-        "submit",
-        event => {
-            event.preventDefault();
-
-            state.search = elements.destination.value.trim();
-            state.pax = Number(elements.guests.value);
-
-            updateURL();
-            readURL();
-            load();
+    function cloneApplied() {
+        return { pax: state.pax, dateStart: state.dateStart, dateEnd: state.dateEnd,
+            priceMin: state.priceMin, priceMax: state.priceMax,
+            eco: state.eco, amenities: new Set(state.amenities) };
+    }
+    function amendGuest(delta) {
+        const entered = Number(ui.guestNumber.value);
+        const value = Number.isInteger(entered) && entered >= 1 && entered <= 20 ? entered : draft.pax;
+        draft.pax = Math.max(1, Math.min(20, value + delta));
+        ui.guestNumber.value = String(draft.pax);
+    }
+    function numericPrice(raw, bound, fallback) {
+        if (String(raw).trim() === "") return fallback;
+        const n = Number(raw);
+        return Number.isFinite(n) ? Math.max(bound.low, Math.min(bound.high, Math.round(n))) : fallback;
+    }
+    function refreshPriceFields() {
+        const bounds = priceBounds();
+        const min = draft.priceMin === null ? bounds.low : Math.max(bounds.low, Math.min(bounds.high, draft.priceMin));
+        const max = draft.priceMax === null ? bounds.high : Math.max(bounds.low, Math.min(bounds.high, draft.priceMax));
+        const low = Math.min(min, max), high = Math.max(min, max);
+        for (const slider of [ui.rangeMin, ui.rangeMax]) { slider.min = String(bounds.low); slider.max = String(bounds.high); slider.step = "1"; }
+        ui.rangeMin.value = String(low); ui.rangeMax.value = String(high);
+        ui.priceMin.value = String(low); ui.priceMax.value = String(high);
+        ui.currencyMin.textContent = bounds.currency;
+        ui.currencyMax.textContent = bounds.currency;
+        const width = bounds.high - bounds.low;
+        ui.rangeTrack.style.background = `linear-gradient(to right, #d9e2e6 0%, #d9e2e6 ${((low-bounds.low)/width)*100}%, #ff790b ${((low-bounds.low)/width)*100}%, #ff790b ${((high-bounds.low)/width)*100}%, #d9e2e6 ${((high-bounds.low)/width)*100}%)`;
+    }
+    function setPrice(kind, raw) {
+        const bounds = priceBounds();
+        const fallback = kind === "min" ? bounds.low : bounds.high;
+        const value = numericPrice(raw, bounds, fallback);
+        const other = kind === "min"
+            ? (draft.priceMax ?? bounds.high) : (draft.priceMin ?? bounds.low);
+        const adjusted = kind === "min" ? Math.min(value, other) : Math.max(value, other);
+        if (kind === "min") draft.priceMin = adjusted <= bounds.low ? null : adjusted;
+        else draft.priceMax = adjusted >= bounds.high ? null : adjusted;
+        refreshPriceFields();
+    }
+    function availableAmenities() {
+        return [...new Set(state.properties.flatMap(p => Array.isArray(p.amenities) ? p.amenities : []))]
+            .filter(Boolean).sort((a,b) => a.localeCompare(b));
+    }
+    function populateAmenities() {
+        const fragment = document.createDocumentFragment();
+        for (const amenity of availableAmenities()) {
+            const label = node("label", "refine-amenity");
+            const check = node("input");
+            check.type = "checkbox";
+            check.checked = draft.amenities.has(amenity);
+            check.addEventListener("change", () => {
+                if (check.checked) draft.amenities.add(amenity);
+                else draft.amenities.delete(amenity);
+            });
+            label.append(check, node("span", "", amenity));
+            fragment.append(label);
         }
-    );
-
-    // Guest-count changes request new API results.
-    elements.guests.addEventListener("change", () => {
-        if (!elements.guests.checkValidity()) {
-            elements.guests.reportValidity();
-            return;
+        ui.amenities.replaceChildren(fragment);
+    }
+    function paintDraft() {
+        ui.eco.checked = draft.eco;
+        ui.guestNumber.value = String(draft.pax);
+        ui.modalDateSummary.textContent = draft.dateStart && draft.dateEnd
+            ? `${shortDate(draft.dateStart)} – ${shortDate(draft.dateEnd)}` : "Select a date";
+        refreshPriceFields();
+        populateAmenities();
+    }
+    function openFilters(focus) {
+        draft = cloneApplied();
+        ui.guestSection.classList.toggle("is-highlighted", focus === "guests");
+        ui.priceSection.classList.toggle("is-highlighted", focus === "price");
+        paintDraft();
+        ui.filter.showModal();
+        if (focus === "guests") ui.guestNumber.focus();
+        else if (focus === "price") ui.priceMax.focus();
+        else ui.filterClose.focus();
+    }
+    function applyDraft() {
+        const pax = Number(ui.guestNumber.value);
+        if (!Number.isInteger(pax) || pax < 1 || pax > 20) {
+            ui.guestNumber.focus(); ui.guestNumber.reportValidity(); return;
         }
+        draft.pax = pax;
+        const mustFetch = draft.pax !== state.pax || draft.dateStart !== state.dateStart || draft.dateEnd !== state.dateEnd;
+        Object.assign(state, { pax: draft.pax, dateStart: draft.dateStart, dateEnd: draft.dateEnd,
+            priceMin: draft.priceMin, priceMax: draft.priceMax, eco: draft.eco, amenities: new Set(draft.amenities) });
+        ui.filter.close();
+        if (mustFetch) { updateURL(); load(); }
+        else render();
+    }
 
-        state.search = elements.destination.value.trim();
-        state.pax = Number(elements.guests.value);
-
-        updateURL();
-        readURL();
-        load();
-    });
-
-    // These controls work on data already fetched.
-    elements.maxPrice.addEventListener("input", render);
-    elements.poolOnly.addEventListener("change", render);
-    elements.sort.addEventListener("change", render);
-
-    elements.dateApply.addEventListener("click", () => {
-        const start = elements.dateStart.value;
-        const end = elements.dateEnd.value;
-
-        // Both dates must be selected.
-        if ((start && !end) || (!start && end)) {
-            showDialog(
-                "Invalid dates",
-                "Select both check-in and checkout."
-            );
-            return;
+    function isoDate(year, month, day) {
+        return `${year}-${String(month+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+    }
+    function todayISO() { const d = new Date(); return isoDate(d.getFullYear(),d.getMonth(),d.getDate()); }
+    function shortDate(value) {
+        const d = new Date(`${value}T00:00:00Z`);
+        return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString("en-US", { month:"short", day:"2-digit", timeZone:"UTC" });
+    }
+    function calendarPanel(year, month) {
+        const box = node("section", "refine-month");
+        box.append(node("h3", "", new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" }).format(new Date(year,month,1))));
+        const grid = node("div", "refine-month-days");
+        for (const day of ["Su","Mo","Tu","We","Th","Fr","Sa"]) grid.append(node("span", "refine-day-name", day));
+        for (let i=0; i<new Date(year,month,1).getDay(); i++) grid.append(node("span"));
+        for (let day=1; day<=new Date(year,month+1,0).getDate(); day++) {
+            const iso = isoDate(year,month,day);
+            const btn = node("button", "refine-day", day);
+            btn.type = "button";
+            btn.disabled = iso < todayISO();
+            btn.setAttribute("aria-label", new Date(year, month, day).toDateString());
+            if (iso === chosenStart || iso === chosenEnd) btn.classList.add("selected");
+            else if (chosenStart && chosenEnd && iso>chosenStart && iso<chosenEnd) btn.classList.add("between");
+            btn.addEventListener("click", () => {
+                if (!chosenStart || chosenEnd || iso <= chosenStart) { chosenStart = iso; chosenEnd = ""; }
+                else chosenEnd = iso;
+                paintCalendar();
+            });
+            grid.append(btn);
         }
-
-        // Checkout must follow check-in.
-        if (start && end <= start) {
-            showDialog(
-                "Invalid dates",
-                "Checkout must be after check-in."
-            );
-            return;
+        box.append(grid);
+        return box;
+    }
+    function paintCalendar() {
+        const year = visibleMonth.getFullYear(), month = visibleMonth.getMonth();
+        const second = new Date(year, month+1, 1);
+        ui.calendarMonths.replaceChildren(calendarPanel(year, month), calendarPanel(second.getFullYear(),second.getMonth()));
+        const today = new Date();
+        ui.monthPrev.disabled = year < today.getFullYear() || (year === today.getFullYear() && month <= today.getMonth());
+        ui.calendarHint.textContent = chosenStart && chosenEnd
+            ? `${shortDate(chosenStart)} – ${shortDate(chosenEnd)}`
+            : chosenStart ? "Choose checkout" : "Choose check-in and checkout";
+        ui.calendarApply.disabled = Boolean(chosenStart && !chosenEnd);
+    }
+    function openCalendar(fromFilters) {
+        calendarOrigin = fromFilters ? "filters" : "standalone";
+        chosenStart = fromFilters ? draft.dateStart : state.dateStart;
+        chosenEnd = fromFilters ? draft.dateEnd : state.dateEnd;
+        const date = chosenStart ? new Date(`${chosenStart}T12:00:00`) : new Date();
+        visibleMonth = new Date(date.getFullYear(),date.getMonth(),1);
+        paintCalendar();
+        ui.calendar.showModal();
+    }
+    function acceptDates() {
+        if (chosenStart && !chosenEnd) return;
+        if (calendarOrigin === "filters") {
+            draft.dateStart = chosenStart;
+            draft.dateEnd = chosenEnd;
+            paintDraft();
+        } else {
+            state.dateStart = chosenStart;
+            state.dateEnd = chosenEnd;
+            updateURL(); updatePills(); load();
         }
+        ui.calendar.close();
+    }
 
-        state.dateStart = start;
-        state.dateEnd = end;
-
-        updateURL();
-        updateDateSummary();
-
-        elements.dateDropdown.open = false;
-
-        // Re-fetch because date filtering happens
-        // in the Beego API, not only in the browser.
-        load();
+    // Filters are intentionally one modal, not four independent <details> panels.
+    document.querySelectorAll("[data-filter-open]").forEach(button => {
+        button.addEventListener("click", () => {
+            const type = button.dataset.filterOpen;
+            if (type === "dates") openCalendar(false);
+            else openFilters(type);
+        });
     });
-
-    elements.dateClear.addEventListener("click", () => {
-        state.dateStart = "";
-        state.dateEnd = "";
-
-        elements.dateStart.value = "";
-        elements.dateEnd.value = "";
-
-        updateURL();
-        updateDateSummary();
-
-        elements.dateDropdown.open = false;
-
-        load();
+    ui.filterClose.addEventListener("click", () => ui.filter.close());
+    ui.filterClear.addEventListener("click", () => { draft = { pax:2, dateStart:"", dateEnd:"", priceMin:null,priceMax:null,eco:false,amenities:new Set() }; paintDraft(); });
+    ui.filterSearch.addEventListener("click", applyDraft);
+    ui.modalDates.addEventListener("click", () => openCalendar(true));
+    ui.guestNumber.addEventListener("input", () => {
+        const n = Number(ui.guestNumber.value);
+        if (Number.isInteger(n) && n >= 1 && n <= 20) draft.pax = n;
     });
-
-    elements.closeDialog.addEventListener(
-        "click",
-        () => elements.dialog.close()
-    );
-
-    // Support browser Back/Forward navigation.
-    window.addEventListener("popstate", () => {
-        readURL();
-        load();
-    });
-
-    readURL();
+    ui.guestMinus.addEventListener("click", () => amendGuest(-1));
+    ui.guestPlus.addEventListener("click", () => amendGuest(1));
+    ui.rangeMin.addEventListener("input", () => setPrice("min", ui.rangeMin.value));
+    ui.rangeMax.addEventListener("input", () => setPrice("max", ui.rangeMax.value));
+    ui.priceMin.addEventListener("change", () => setPrice("min", ui.priceMin.value));
+    ui.priceMax.addEventListener("change", () => setPrice("max", ui.priceMax.value));
+    ui.eco.addEventListener("change", () => { draft.eco = ui.eco.checked; });
+    ui.calendarClose.addEventListener("click", () => ui.calendar.close());
+    ui.monthPrev.addEventListener("click", () => { visibleMonth.setMonth(visibleMonth.getMonth()-1); paintCalendar(); });
+    ui.monthNext.addEventListener("click", () => { visibleMonth.setMonth(visibleMonth.getMonth()+1); paintCalendar(); });
+    ui.calendarClear.addEventListener("click", () => { chosenStart=""; chosenEnd=""; paintCalendar(); });
+    ui.calendarApply.addEventListener("click", acceptDates);
+    ui.messageClose.addEventListener("click", () => ui.message.close());
+    ui.sort.addEventListener("change", render);
+    window.addEventListener("popstate", () => { parseURL(); load(); });
+    parseURL();
     load();
 })();

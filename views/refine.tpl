@@ -3,184 +3,133 @@
 <html lang="{{.Language}}">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Find a Place to Stay | {{.SiteName}}</title>
     <link rel="canonical" href="{{.CanonicalURL}}">
-
-    {{if .GlobalCSS}}
-    <link rel="stylesheet" href="{{.GlobalCSS}}">
-    {{end}}
-
-    {{if .TemplateCSS}}
-    <link rel="stylesheet" href="{{.TemplateCSS}}">
-    {{end}}
-
+    {{if .GlobalCSS}}<link rel="stylesheet" href="{{.GlobalCSS}}">{{end}}
+    {{if .TemplateCSS}}<link rel="stylesheet" href="{{.TemplateCSS}}">{{end}}
     <link rel="stylesheet" href="/static/css/refine.css">
-
     <link rel="stylesheet" href="/static/css/property_search_popup.css">
-
     {{.WidgetHTML}}
 </head>
-
 <body class="refine-route">
     {{.HeaderHTML}}
 
     <main id="refine-app" class="refine-app">
         <div class="refine-inner">
-
-            <p class="refine-breadcrumb">
-                Vacation Rentals in
-                <span id="refine-breadcrumb-destination">
-                    your destination
-                </span>
-            </p>
-
-            <h1>
-                Find a Place to Stay in
-                <span id="refine-heading-destination">
-                    your destination
-                </span>
-            </h1>
-
-            <p class="refine-subtitle">
-                Plan Your Perfect Getaway
-            </p>
-
-            <form id="refine-search-form"
-                  class="refine-search-form"
-                  role="search">
-
-                <label for="refine-destination">
-                    Destination
-                    <input id="refine-destination"
-                           type="search"
-                           placeholder="Search destination"
-                           autocomplete="off">
-                </label>
-
-                <label for="refine-guests">
-                    Guests
-                    <input id="refine-guests"
-                           type="number"
-                           min="1"
-                           max="20"
-                           step="1"
-                           value="2"
-                           required>
-                </label>
-
-                <button type="submit"
-                        class="refine-search-submit">
-                    Search Stays
-                </button>
-            </form>
+            <p class="refine-breadcrumb">Vacation Rentals in <span id="refine-breadcrumb-destination">your destination</span></p>
+            <h1>Find a Place to Stay in <span id="refine-heading-destination">your destination</span></h1>
+            <p class="refine-subtitle">Plan Your Perfect Getaway to</p>
 
             <div class="refine-toolbar">
-                <div class="refine-filters">
-                    <details id="refine-date-dropdown"
-                             class="refine-date-dropdown">
-
-                        <summary id="refine-dates"
-                                 class="refine-date-button">
-                            Dates
-                        </summary>
-
-                        <div class="refine-date-panel">
-                            <label for="refine-date-start">
-                                Check-in
-                                <input id="refine-date-start"
-                                       type="date">
-                            </label>
-
-                            <label for="refine-date-end">
-                                Checkout
-                                <input id="refine-date-end"
-                                       type="date">
-                            </label>
-
-                            <div class="refine-date-actions">
-                                <button id="refine-date-clear"
-                                        type="button">
-                                    Clear
-                                </button>
-
-                                <button id="refine-date-apply"
-                                        type="button">
-                                    Apply Dates
-                                </button>
-                            </div>
-                        </div>
-                    </details>
-
-                    <label for="refine-max-price">
-                        Maximum sample price (USD)
-                        <input id="refine-max-price"
-                               type="number"
-                               min="0"
-                               placeholder="Any price">
-                    </label>
-
-                    <label class="refine-filter-checkbox"
-                           for="refine-pool-only">
-                        <input id="refine-pool-only"
-                               type="checkbox">
-                        Pool only
-                    </label>
+                <div class="refine-filters" role="group" aria-label="Property filters">
+                    <button type="button" class="refine-filter-pill" data-filter-open="dates">Dates</button>
+                    <button type="button" class="refine-filter-pill" data-filter-open="price">Price</button>
+                    <button type="button" class="refine-filter-pill" data-filter-open="guests">Guests</button>
+                    <button type="button" class="refine-filter-pill" data-filter-open="more">More</button>
                 </div>
-
-                <label for="refine-sort"
-                       class="refine-sort-label">
+                <label class="refine-sort-label" for="refine-sort">
                     Sort by
                     <select id="refine-sort">
-                        <option value="popular">
-                            Most Reviewed
-                        </option>
-                        <option value="price_low">
-                            Price: Low to High
-                        </option>
-                        <option value="price_high">
-                            Price: High to Low
-                        </option>
+                        <option value="popular">Most Popular</option>
+                        <option value="price_low">Price: Low to High</option>
+                        <option value="price_high">Price: High to Low</option>
                     </select>
                 </label>
             </div>
 
-            <p id="refine-status"
-               class="refine-status"
-               role="status"
-               aria-live="polite">
-                Loading properties...
-            </p>
-
-            <!-- JavaScript creates the property cards here. -->
-            <section id="refine-grid"
-                     class="refine-grid"
-                     aria-label="Property listings">
-            </section>
-
+            <p id="refine-status" class="refine-status" role="status" aria-live="polite">Loading properties...</p>
+            <section id="refine-grid" class="refine-grid" aria-label="Property listings"></section>
+            <p class="refine-disclaimer">Sample prices, guest capacities, photographs and availability are illustrative. Confirm details with the booking provider.</p>
         </div>
     </main>
 
     {{.FooterHTML}}
 
-    <dialog id="refine-dialog"
-            class="refine-dialog"
-            aria-labelledby="refine-dialog-title">
-        <h2 id="refine-dialog-title"></h2>
-        <p id="refine-dialog-message"></p>
-        <button id="refine-dialog-close" type="button">
-            Close
-        </button>
+    <!-- All of Price, Guests and More open this SAME centered filter modal. -->
+    <dialog id="refine-filter-dialog" class="refine-filter-dialog" aria-labelledby="refine-filter-title">
+        <div class="refine-modal-heading">
+            <h2 id="refine-filter-title">Filters</h2>
+            <button type="button" id="refine-filter-close" class="refine-modal-x" aria-label="Close filters">×</button>
+        </div>
+        <div class="refine-filter-modal-body">
+            <div class="refine-modal-two-cols">
+                <label class="refine-modal-tile refine-modal-check disabled" title="Pet-friendly data is not available in this assessment dataset">
+                    <span>🐾 Pet-friendly only</span>
+                    <input type="checkbox" disabled aria-label="Pet-friendly filter unavailable">
+                </label>
+                <label class="refine-modal-tile refine-modal-check">
+                    <span>🍃 Eco-friendly only</span>
+                    <input id="refine-eco-only" type="checkbox">
+                </label>
+                <button type="button" id="refine-modal-dates" class="refine-modal-tile refine-modal-action">
+                    <span id="refine-modal-date-summary">Select a date</span><span class="refine-modal-calendar-icon" aria-hidden="true">▣</span>
+                </button>
+                <div id="refine-guest-section" class="refine-modal-tile refine-modal-guests">
+                    <span>Guests</span>
+                    <div class="refine-guest-controls">
+                        <button id="refine-guest-minus" type="button" aria-label="Decrease guests">−</button>
+                        <input id="refine-guest-number" type="number" min="1" max="20" step="1" value="2" aria-label="Number of guests">
+                        <button id="refine-guest-plus" type="button" aria-label="Increase guests">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <section id="refine-price-section" class="refine-price-section" aria-labelledby="refine-price-heading">
+                <h3 id="refine-price-heading">Price range</h3>
+                <div class="refine-range-wrap">
+                    <div class="refine-range-track" id="refine-range-track"></div>
+                    <input id="refine-range-min" type="range" min="0" max="100" value="0" aria-label="Minimum price slider">
+                    <input id="refine-range-max" type="range" min="0" max="100" value="100" aria-label="Maximum price slider">
+                </div>
+                <div class="refine-price-fields">
+                    <label for="refine-min-price">Min price</label>
+                    <span class="refine-money-field"><span id="refine-price-currency-min">USD</span><input id="refine-min-price" type="number" min="0" step="1" inputmode="numeric" aria-label="Minimum price"></span>
+                    <span class="refine-price-dash">–</span>
+                    <span class="refine-money-field"><span id="refine-price-currency-max">USD</span><input id="refine-max-price" type="number" min="0" step="1" inputmode="numeric" aria-label="Maximum price"></span>
+                    <label for="refine-max-price">Max price</label>
+                </div>
+            </section>
+
+            <section class="refine-amenities-section" aria-labelledby="refine-amenities-heading">
+                <h3 id="refine-amenities-heading">Amenities</h3>
+                <div id="refine-amenities-grid" class="refine-amenities-grid"></div>
+            </section>
+        </div>
+        <div class="refine-modal-footer">
+            <button type="button" id="refine-filter-clear" class="refine-clear-button">Clear</button>
+            <button type="button" id="refine-filter-search" class="refine-search-button">Search</button>
+        </div>
     </dialog>
 
-    {{if .GlobalJS}}
-    <script src="{{.GlobalJS}}" defer></script>
-    {{end}}
+    <!-- Date selection uses an independent modal, not an inline details panel. -->
+    <dialog id="refine-calendar-dialog" class="refine-calendar-dialog" aria-labelledby="refine-calendar-title">
+        <div class="refine-modal-heading">
+            <h2 id="refine-calendar-title">Select your dates</h2>
+            <button type="button" id="refine-calendar-close" class="refine-modal-x" aria-label="Close calendar">×</button>
+        </div>
+        <div class="refine-calendar-content">
+            <div class="refine-calendar-toolbar">
+                <button id="refine-month-prev" type="button" aria-label="Previous month">‹</button>
+                <strong id="refine-calendar-hint">Choose check-in and checkout</strong>
+                <button id="refine-month-next" type="button" aria-label="Next month">›</button>
+            </div>
+            <div id="refine-calendar-months" class="refine-calendar-months"></div>
+        </div>
+        <div class="refine-modal-footer">
+            <button type="button" id="refine-calendar-clear" class="refine-clear-button">Clear</button>
+            <button type="button" id="refine-calendar-apply" class="refine-search-button">Apply dates</button>
+        </div>
+    </dialog>
 
+    <dialog id="refine-dialog" class="refine-message-dialog" aria-labelledby="refine-dialog-title">
+        <h2 id="refine-dialog-title"></h2>
+        <p id="refine-dialog-message"></p>
+        <button type="button" id="refine-dialog-close">Close</button>
+    </dialog>
+
+    {{if .GlobalJS}}<script src="{{.GlobalJS}}" defer></script>{{end}}
     <script src="/static/js/refine.js" defer></script>
-
     <script src="/static/js/property_search_popup.js" defer></script>
 </body>
 </html>
