@@ -53,10 +53,6 @@
                     <div class="refine-filter-chip" data-filter-chip="more">
                         <button type="button" class="refine-filter-pill"
                                 data-filter-open="more">More</button>
-                        <button type="button" class="refine-filter-remove"
-                                data-filter-remove="more"
-                                aria-label="Clear additional filters"
-                                hidden>×</button>
                         <span id="refine-more-count"
                               class="refine-filter-count"
                               aria-hidden="true"

@@ -108,7 +108,9 @@
             opener.textContent = labels[type];
             opener.setAttribute("aria-pressed", String(active[type]));
 
-            remove.hidden = !active[type];
+            if (remove) {
+                remove.hidden = !active[type];
+            }
         });
 
         const countBadge = document.getElementById("refine-more-count");

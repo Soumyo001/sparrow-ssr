@@ -103,13 +103,6 @@ body.refine-route .refine-app h1 {
     pointer-events: none;
 }
 
-/* Keep the More count and its clear button separate. */
-
-.refine-filter-chip[data-filter-chip="more"]
-.refine-filter-remove {
-    left: -7px;
-    right: auto;
-}
 .refine-sort-label { display: flex; align-items: center; gap: 10px; color: #052e34; font-size: 13px; font-weight: 700; white-space: nowrap; }
 .refine-sort-label select { min-height: 36px; width: 176px; padding: 5px 13px; background: transparent; color: #092c33; border: 2px solid #073e45; border-radius: 23px; font: 400 13px Arial, sans-serif; cursor: pointer; }
 .refine-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
