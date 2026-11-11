@@ -88,6 +88,9 @@
             </div>
 
             <p class="refine-disclaimer">
+                Sample prices, guest capacities, photographs and availability are
+                illustrative. Confirm details with the booking provider.
+            </p>
         </div>
     </main>
 
