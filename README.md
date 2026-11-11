@@ -21,6 +21,12 @@ The assessment uses **local JSON files arranged in the same relative directory s
 | URL resolution | In-memory `(hostname, canonical path)` catalog |
 | JSON content cache | Process-local, typed, concurrency-safe caches |
 | Tests and performance tools | Go `testing`, `httptest`, race detector, benchmarks, `pprof` |
+| Property database | Neon PostgreSQL |
+| Database access | Beego ORM with pgx v5 |
+| Property data models | Normalized sites, locations, properties and property_availability |
+| Database utilities | cmd/dbsetup and cmd/dbseed |
+| Client frontend | JavaScript, static/js/refine.js and static/js/property_search_popup.js |
+| Property API | GET /api/properties, backed by PostgreSQL |
 
 Run the commands below from the **project root**. A compatible Go toolchain is required; Bee CLI is only needed for `bee run`.
 
@@ -80,42 +86,47 @@ Shared CSS, template CSS, page CSS, shared JS, and page JS remain external URLs 
 sparrow-ssr/
 ├── main.go
 ├── go.mod
+├── go.sum
+├── cmd/
+│   ├── dbsetup/
+│   └── dbseed/
 ├── conf/
 │   ├── app.conf
 │   └── deployment.json
 ├── models/
-│   ├── deployment.go
 │   ├── content.go
+│   ├── deployment.go
 │   ├── route.go
-│   └── render.go
+│   ├── render.go
+│   ├── property.go
+│   └── availability.go
 ├── services/
 │   ├── catalog.go
 │   ├── multi_catalog.go
 │   ├── content_loader.go
 │   ├── file_cache.go
-│   ├── catalog_test.go
-│   ├── multi_catalog_test.go
-│   ├── content_loader_test.go
-│   ├── content_cache_test.go
-│   └── content_bench_test.go
+│   ├── property_database.go
+│   ├── property_db_search.go
+│   ├── property_searcher.go
+│   ├── property_filters.go
+│   └── *_test.go
 ├── controllers/
-│   └── page.go
+│   ├── page.go
+│   ├── refine.go
+│   ├── property_api.go
+│   └── health.go
 ├── routers/
 │   └── router.go
 ├── views/
-│   └── page.tpl
+│   ├── page.tpl
+│   └── refine.tpl
+├── static/
+│   ├── css/
+│   ├── js/
+│   └── img/
 ├── tests/
-│   ├── ssr_integration_test.go
-│   └── ssr_bench_test.go
-└── content/
-    └── beta/preview/test-travel-templates/
-        ├── header.json
-        ├── footer.json
-        ├── home.json
-        ├── privacy-policy.json
-        ├── site-terms.json
-        ├── untitled-post-wrurmp.json
-        └── links.json
+├── content/
+└── README.md
 ```
 
 `services/` contains application-specific logic; controllers handle HTTP/template data; `models/` represent observed JSON fields. The test files under `tests/` exercise the Beego HTTP path, not just isolated services.
@@ -343,4 +354,4 @@ Future optimizations should start with **measured requirements**, then isolated 
 
 ---
 
-**Project status:** URL resolution, server-side HTML, concurrent JSON loading and caching, multi-site startup catalog, multi-site HTTP tests, benchmarks, and profiling have been implemented/tested to the extent described above. A future feature is not represented as implemented solely because it appears in this README.
+**Project status (11 November 2026):** The original SSR architecture, multi-site routing, JSON content caching, performance benchmarks and HTTP tests remain implemented. DB-1 database schema, DB-2 seeding, DB-3A PostgreSQL search, DB-3B.1 HTTP API cutover and DB-3B.2 dynamic database updates have been verified using submitted tests and runtime evidence. DB-3B.3 has removed the legacy property JSON dependencies and passed the submitted Go tests, race checks and Neon integration tests. Final browser smoke-test verification is ongoing. The reference filter UI redesign, client-side pagination and Render deployment remain deferred. The publisher SSR JSON and external asset references are intentionally preserved.
