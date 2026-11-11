@@ -128,22 +128,13 @@
         return node;
     }
 
-    // Prefer actual pricing when present.
-    // Otherwise use explicitly illustrative demo pricing.
+    // Database prices use the regular public API field.
     function priceAmount(property) {
-        const actual = Number(property.price_from);
+        const amount = Number(property.price_from);
 
-        if (Number.isFinite(actual) && actual > 0) {
-            return actual;
-        }
-
-        const demo = Number(property.demo_price_from);
-
-        if (Number.isFinite(demo) && demo > 0) {
-            return demo;
-        }
-
-        return 0;
+        return Number.isFinite(amount) && amount > 0
+            ? amount
+            : 0;
     }
 
     function formatPrice(property) {
@@ -271,16 +262,12 @@
         }
 
         const displayedPrice = formatPrice(property);
-        const demoPrice =
-            Number(property.price_from) <= 0 &&
-            Number(property.demo_price_from) > 0;
-
         picture.append(
             el(
                 "span",
                 "refine-price",
                 displayedPrice
-                    ? `${demoPrice ? "Demo from" : "From"} ${displayedPrice}`
+                    ? `From ${displayedPrice}`
                     : "Check provider for price"
             )
         );
@@ -352,10 +339,6 @@
         const details = [
             property.size_sqft
                 ? `${property.size_sqft} ft²`
-                : "",
-            property.demo_max_guests > 0 &&
-            property.max_guests <= 0
-                ? `Demo capacity: ${property.demo_max_guests} guests`
                 : "",
             property.property_type,
             ...(Array.isArray(property.amenities)

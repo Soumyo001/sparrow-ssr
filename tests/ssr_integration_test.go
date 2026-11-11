@@ -151,72 +151,29 @@ func TestMultiSiteSSRHTTP(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Create separate property datasets for the two test sites.
-	mockRoot := t.TempDir()
-
-	for _, tc := range []struct {
-		site string
-		id   string
-	}{
-		{"alpha", "alpha-property"},
-		{"bravo", "bravo-property"},
-	} {
-		folder := filepath.Join(
-			mockRoot,
-			"beta",
-			"preview",
-			tc.site,
-		)
-
-		if err := os.MkdirAll(folder, 0755); err != nil {
-			t.Fatal(err)
-		}
-
-		writeFixture(
-			t,
-			filepath.Join(folder, "properties.json"),
-			models.PropertyDataset{
-				Properties: []models.Property{
-					{
-						ID:        tc.id,
-						Name:      tc.site + " Property",
-						MaxGuests: 4,
-						Location: models.PropertyLocation{
-							Country: "USA",
-						},
-						PopularityScore: 90,
-					},
-				},
+	// Exercise site selection and API handling without a database connection.
+	// The database search itself is tested separately against Neon.
+	propertySearch := fixturePropertySearcher{
+		"beta/preview/alpha": {
+			property: models.Property{
+				ID:              "alpha-property",
+				Name:            "alpha Property",
+				MaxGuests:       4,
+				Location:        models.PropertyLocation{Country: "USA"},
+				PopularityScore: 90,
 			},
-		)
-
-		windowStart := "2026-11-01"
-
-		if tc.site == "bravo" {
-			windowStart = "2026-11-15"
-		}
-
-		writeFixture(
-			t,
-			filepath.Join(folder, "availability.json"),
-			models.PropertyAvailability{
-				Properties: map[string][]models.AvailabilityWindow{
-					tc.id: {
-						{
-							Start: windowStart,
-							End:   "2027-12-31",
-						},
-					},
-				},
+			availableFrom: "2026-11-01",
+		},
+		"beta/preview/bravo": {
+			property: models.Property{
+				ID:              "bravo-property",
+				Name:            "bravo Property",
+				MaxGuests:       4,
+				Location:        models.PropertyLocation{Country: "USA"},
+				PopularityScore: 90,
 			},
-		)
-	}
-
-	propertySearch, err :=
-		services.NewPropertySearchService(mockRoot)
-
-	if err != nil {
-		t.Fatal(err)
+			availableFrom: "2026-11-15",
+		},
 	}
 
 	// Initialize Beego using the actual project directory.

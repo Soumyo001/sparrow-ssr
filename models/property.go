@@ -17,12 +17,10 @@ type Property struct {
 	PropertyType    string           `json:"property_type"`
 	Location        PropertyLocation `json:"location"`
 	MaxGuests       int              `json:"max_guests"`
-	DemoMaxGuests   int              `json:"demo_max_guests,omitempty"` // Transitional: remove when the API switches to PostgreSQL.
 	SizeSqFt        int              `json:"size_sqft"`
 	Rating          float64          `json:"rating"`
 	ReviewCount     int              `json:"review_count"`
 	PriceFrom       int              `json:"price_from"`
-	DemoPriceFrom   int              `json:"demo_price_from,omitempty"` // Transitional: remove when the API switches to PostgreSQL.
 	Currency        string           `json:"currency"`
 	Amenities       []string         `json:"amenities"`
 	ProviderName    string           `json:"provider_name"`
@@ -30,12 +28,6 @@ type Property struct {
 	PopularityScore int              `json:"popularity_score"`
 	EcoFriendly     bool             `json:"eco_friendly"`
 	Images          []string         `json:"images"`
-}
-
-// PropertyDataset exists only for the old JSON-backed search service and
-// its tests. It will be removed during the database cutover.
-type PropertyDataset struct {
-	Properties []Property `json:"properties"`
 }
 
 // SiteRecord identifies one deployment's property catalog. Key is the

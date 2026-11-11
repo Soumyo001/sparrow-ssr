@@ -2,15 +2,6 @@ package models
 
 import "time"
 
-type AvailabilityWindow struct {
-	Start string `json:"start"`
-	End   string `json:"end"`
-}
-
-type PropertyAvailability struct {
-	Properties map[string][]AvailabilityWindow `json:"properties"`
-}
-
 // AvailabilityRecord links available [check-in, checkout) windows to
 // the property's database primary key, not its public string identifier.
 type AvailabilityRecord struct {

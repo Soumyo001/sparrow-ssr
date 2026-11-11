@@ -2,73 +2,35 @@ package services
 
 import "testing"
 
-func TestPropertySearchDateAvailability(t *testing.T) {
-	service, err := NewPropertySearchService("../mock_data")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	const site = "beta/preview/test-travel-templates"
-
+func TestParseStayDates(t *testing.T) {
 	for _, tc := range []struct {
-		start string
-		end   string
-		want  int
+		name      string
+		start     string
+		end       string
+		wantError bool
 	}{
-		{"2026-11-06", "2026-11-13", 10},
-		{"2026-11-16", "2026-11-20", 15},
-		{"2027-12-30", "2028-01-01", 0},
+		{"no_dates", "", "", false},
+		{"valid_dates", "2026-11-06", "2026-11-13", false},
+		{"same_day", "2026-11-06", "2026-11-06", true},
+		{"missing_start", "", "2026-11-13", true},
+		{"missing_end", "2026-11-06", "", true},
+		{"reversed_dates", "2026-11-13", "2026-11-06", true},
+		{"invalid_start", "2026-02-30", "2026-03-03", true},
+		{"invalid_end", "2026-11-06", "invalid", true},
 	} {
-		got, err := service.Search(
-			site,
-			PropertyFilters{
-				Search:    "usa",
-				Pax:       2,
-				Order:     1,
-				DateStart: tc.start,
-				DateEnd:   tc.end,
-			},
-		)
-
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if len(got) != tc.want {
-			t.Fatalf(
-				"%s to %s: want %d, got %d",
-				tc.start, tc.end,
-				tc.want, len(got),
-			)
-		}
-	}
-
-	// Invalid and incomplete date ranges.
-	for _, tc := range []struct {
-		start string
-		end   string
-	}{
-		{"2026-11-06", ""},
-		{"", "2026-11-13"},
-		{"2026-11-13", "2026-11-06"},
-		{"2026-02-30", "2026-03-03"},
-	} {
-		_, err := service.Search(
-			site,
-			PropertyFilters{
-				Search:    "usa",
-				Pax:       2,
-				Order:     1,
-				DateStart: tc.start,
-				DateEnd:   tc.end,
-			},
-		)
-
-		if err == nil {
-			t.Errorf(
-				"expected invalid date error: %+v",
-				tc,
-			)
-		}
+		t.Run(tc.name, func(t *testing.T) {
+			start, end, err := ParseStayDates(tc.start, tc.end)
+			if (err != nil) != tc.wantError {
+				t.Fatalf("ParseStayDates(%q, %q): error=%v, wantError=%t", tc.start, tc.end, err, tc.wantError)
+			}
+			if err == nil {
+				if tc.start == "" && (!start.IsZero() || !end.IsZero()) {
+					t.Fatal("empty dates must produce zero times")
+				}
+				if tc.start != "" && !end.After(start) {
+					t.Fatal("checkout must follow check-in")
+				}
+			}
+		})
 	}
 }
