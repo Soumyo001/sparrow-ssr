@@ -123,7 +123,7 @@ body.refine-route .refine-app h1 {
 .refine-property-type { color: #617175; }
 body.refine-route .refine-card-title { margin: 1px 0; font: 700 12px/1.35 Arial, sans-serif; color: #071e33; }
 .refine-card-details, .refine-card-location { margin: 0; font: 12px/1.35 Arial, sans-serif; color: #204b59; }
-.refine-card-details { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.refine-card-details { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .refine-card-bottom { display: flex; align-items: end; justify-content: space-between; gap: 8px; margin-top: auto; padding-top: 8px; }
 .refine-provider { color: #0c3c80; font-weight: 700; }
 .refine-availability { border: 0; border-radius: 5px; padding: 9px 13px; background: #ff790b; color: #fff; font: 700 12px Arial, sans-serif; white-space: nowrap; cursor: pointer; }
