@@ -6,7 +6,8 @@ Sparrow SSR is an internship assessment project for **W3 Engineers**. It accepts
 
 The assessment uses **local JSON files arranged in the same relative directory structure as the publisher's S3/CDN object keys**. It does **not** fetch the JSON documents from S3 at request time. External CSS and JavaScript URLs present in the JSON are preserved in the rendered HTML.
 
-> **Implementation scope (5 November 2026):** The supplied real deployment contains one site with four canonical pages. The code also supports registering multiple deployment metadata files **at startup**. Two-site routing, content separation, and cached HTTP rendering have been verified using synthetic test fixtures—not a second real deployment.
+> **Implementation scope (11 November 2026):** Sparrow SSR supports deployment-metadata-driven multi-site server-side rendering using publisher-managed JSON, alongside a client-rendered accommodation-search application powered by Neon PostgreSQL, Beego ORM and pgx. The current database seed contains one site, eight reusable locations, fifteen properties and fifteen availability windows. Property prices, guest capacities, photographs and availability are illustrative assessment data, not live booking-provider information. Two-site HTTP routing has been tested with synthetic fixtures; real PostgreSQL search has been verified against the seeded site.
+
 
 ## 1. Technology and requirements
 
@@ -121,6 +122,31 @@ sparrow-ssr/
 
 ## 4. Running the application
 
+### PostgreSQL initialization
+
+Configure `.env` with a valid Neon PostgreSQL connection string requiring TLS.
+
+For a newly created database, run:
+
+```bash
+go run ./cmd/dbsetup
+go run ./cmd/dbseed
+```
+
+The setup command creates the normalized `sites`, `locations`, `properties`, and `property_availability` tables, indexes and foreign-key constraints.
+
+The seed command inserts the application's initial sample property and availability records. It does not read property JSON files.
+
+Re-running the seed command does not overwrite existing property records. The original verification inserted 1 site, 8 locations, 15 properties and 15 availability records; a second execution inserted zero new records.
+
+### Running the application
+
+```bash
+go run .
+```
+
+The application initializes PostgreSQL before accepting requests. The property API uses PostgreSQL as its runtime property and availability source. Publisher-managed page JSON under `content/` remains necessary for server-side rendering.
+
 ### Single-deployment demo
 
 ```bash
@@ -152,7 +178,16 @@ SPARROW_DEPLOYMENTS='conf/deployment.json,conf/second-deployment.json' go run .
 
 `conf/second-deployment.json` is illustrative; **it is not bundled with this project**. The existing real demo consists of one deployment. The multi-site tests create disposable synthetic sites instead.
 
-`.env.example` documents the variable, but the application does **not** automatically read `.env` files; export/set the variable through your shell or process supervisor. A bad or conflicting deployment causes startup catalog construction to fail rather than silently serving an incomplete index. There is no runtime deployment-registration API or hot reload of the catalog.
+
+The application uses `godotenv.Load()` to load an optional `.env` file. Existing process environment variables take precedence over values in that file.
+
+The web application prefers `DATABASE_URL_POOLED` when it is nonempty, otherwise it uses `DATABASE_URL`. This is selection based on whether the variable is present, not automatic connection-failure recovery.
+
+The database setup command currently uses `DATABASE_URL`. The seed command prefers `DATABASE_URL_DIRECT`, falling back to `DATABASE_URL`. Database setup and seeding should use direct PostgreSQL connections.
+
+The `.env` file must not be committed to version control. PostgreSQL credentials are required to run the application, while ordinary unit and HTTP tests do not require Neon. The Neon integration tests are explicitly enabled using `SPARROW_TEST_NEON=1`.
+
+The application defaults to `127.0.0.1:8080`. When `PORT` is configured, it binds to `0.0.0.0:<PORT>`. Render deployment has not yet been verified.
 
 ## 5. Concurrent content loading and caching
 
