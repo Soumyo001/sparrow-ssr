@@ -23,10 +23,45 @@
 
             <div class="refine-toolbar">
                 <div class="refine-filters" role="group" aria-label="Property filters">
-                    <button type="button" class="refine-filter-pill" data-filter-open="dates">Dates</button>
-                    <button type="button" class="refine-filter-pill" data-filter-open="price">Price</button>
-                    <button type="button" class="refine-filter-pill" data-filter-open="guests">Guests</button>
-                    <button type="button" class="refine-filter-pill" data-filter-open="more">More</button>
+                    <div class="refine-filter-chip" data-filter-chip="dates">
+                        <button type="button" class="refine-filter-pill"
+                                data-filter-open="dates">Dates</button>
+                        <button type="button" class="refine-filter-remove"
+                                data-filter-remove="dates"
+                                aria-label="Clear dates filter"
+                                hidden>×</button>
+                    </div>
+
+                    <div class="refine-filter-chip" data-filter-chip="price">
+                        <button type="button" class="refine-filter-pill"
+                                data-filter-open="price">Price</button>
+                        <button type="button" class="refine-filter-remove"
+                                data-filter-remove="price"
+                                aria-label="Clear price filter"
+                                hidden>×</button>
+                    </div>
+
+                    <div class="refine-filter-chip" data-filter-chip="guests">
+                        <button type="button" class="refine-filter-pill"
+                                data-filter-open="guests">Guests</button>
+                        <button type="button" class="refine-filter-remove"
+                                data-filter-remove="guests"
+                                aria-label="Reset guests to two"
+                                hidden>×</button>
+                    </div>
+
+                    <div class="refine-filter-chip" data-filter-chip="more">
+                        <button type="button" class="refine-filter-pill"
+                                data-filter-open="more">More</button>
+                        <button type="button" class="refine-filter-remove"
+                                data-filter-remove="more"
+                                aria-label="Clear additional filters"
+                                hidden>×</button>
+                        <span id="refine-more-count"
+                              class="refine-filter-count"
+                              aria-hidden="true"
+                              hidden></span>
+                    </div>
                 </div>
                 <label class="refine-sort-label" for="refine-sort">
                     Sort by

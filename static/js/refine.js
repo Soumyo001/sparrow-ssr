@@ -64,16 +64,57 @@
         }
         history.pushState({}, "", `/refine?${params.toString()}`);
     }
+
     function updatePills() {
+        const moreCount = (state.eco ? 1 : 0) + state.amenities.size;
+
         const active = {
             dates: Boolean(state.dateStart && state.dateEnd),
             price: state.priceMin !== null || state.priceMax !== null,
             guests: state.pax !== 2,
-            more: state.eco || state.amenities.size > 0
+            more: moreCount > 0
         };
-        document.querySelectorAll("[data-filter-open]").forEach(button => {
-            button.setAttribute("aria-pressed", String(active[button.dataset.filterOpen]));
+
+        let priceText = "Price";
+
+        if (active.price) {
+            const currency = priceBounds().currency;
+            const symbols = {
+                USD: "$",
+                BDT: "৳",
+                EUR: "€",
+                GBP: "£"
+            };
+
+            priceText = `Price ${symbols[currency] || currency}`;
+        }
+
+        const labels = {
+            dates: active.dates
+                ? `${shortDate(state.dateStart)} – ${shortDate(state.dateEnd)}`
+                : "Dates",
+            price: priceText,
+            guests: active.guests
+                ? `${state.pax} Guests`
+                : "Guests",
+            more: "More"
+        };
+
+        document.querySelectorAll("[data-filter-chip]").forEach(chip => {
+            const type = chip.dataset.filterChip;
+            const opener = chip.querySelector("[data-filter-open]");
+            const remove = chip.querySelector("[data-filter-remove]");
+
+            opener.textContent = labels[type];
+            opener.setAttribute("aria-pressed", String(active[type]));
+
+            remove.hidden = !active[type];
         });
+
+        const countBadge = document.getElementById("refine-more-count");
+
+        countBadge.textContent = String(moreCount);
+        countBadge.hidden = moreCount === 0;
     }
     function priceAmount(p) {
         const n = Number(p.price_from);
@@ -386,6 +427,54 @@
             else openFilters(type);
         });
     });
+
+    document.querySelectorAll("[data-filter-remove]").forEach(button => {
+        button.addEventListener("click", event => {
+            event.stopPropagation();
+
+            const type = button.dataset.filterRemove;
+            let needsFetch = false;
+
+            switch (type) {
+                case "dates":
+                    state.dateStart = "";
+                    state.dateEnd = "";
+                    needsFetch = true;
+                    break;
+
+                case "price":
+                    state.priceMin = null;
+                    state.priceMax = null;
+                    break;
+
+                case "guests":
+                    state.pax = 2;
+                    needsFetch = true;
+                    break;
+
+                case "more":
+                    state.eco = false;
+                    state.amenities.clear();
+                    break;
+
+                default:
+                    return;
+            }
+
+            if (needsFetch) {
+                updateURL();
+                updatePills();
+                load();
+            } else {
+                render();
+            }
+
+            button.parentElement
+                .querySelector("[data-filter-open]")
+                .focus();
+        });
+    });
+
     ui.filterClose.addEventListener("click", () => ui.filter.close());
     ui.filterClear.addEventListener("click", () => { draft = { pax:2, dateStart:"", dateEnd:"", priceMin:null,priceMax:null,eco:false,amenities:new Set() }; paintDraft(); });
     ui.filterSearch.addEventListener("click", applyDraft);
