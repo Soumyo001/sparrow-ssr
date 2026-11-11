@@ -70,8 +70,24 @@
             </div>
 
             <p id="refine-status" class="refine-status" role="status" aria-live="polite">Loading properties...</p>
-            <section id="refine-grid" class="refine-grid" aria-label="Property listings"></section>
-            <p class="refine-disclaimer">Sample prices, guest capacities, photographs and availability are illustrative. Confirm details with the booking provider.</p>
+
+            <section id="refine-grid"
+                     class="refine-grid"
+                     aria-label="Property listings"
+                     tabindex="-1"></section>
+
+            <div id="refine-pagination-wrap"
+                 class="refine-pagination-wrap"
+                 hidden>
+                <p id="refine-page-summary"
+                   class="refine-page-summary"></p>
+
+                <nav id="refine-pagination"
+                     class="refine-pagination"
+                     aria-label="Property result pages"></nav>
+            </div>
+
+            <p class="refine-disclaimer">
         </div>
     </main>
 

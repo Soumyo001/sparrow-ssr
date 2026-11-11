@@ -253,3 +253,82 @@ body.refine-route dialog.refine-message-dialog::backdrop { background: rgba(0,0,
     .refine-calendar-months { grid-template-columns: 1fr; }
     .refine-month:nth-child(2) { display: none; }
 }
+
+/* Step 12 — Client-side pagination */
+
+.refine-grid {
+    scroll-margin-top: 145px;
+}
+
+.refine-pagination-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin: 28px 0 0;
+}
+
+.refine-pagination-wrap[hidden] {
+    display: none !important;
+}
+
+.refine-page-summary {
+    margin: 0;
+    color: #31585e;
+    font: 13px/1.4 Arial, sans-serif;
+}
+
+.refine-pagination {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 7px;
+}
+
+.refine-page-button {
+    min-width: 36px;
+    height: 35px;
+    padding: 6px 11px;
+    border: 1px solid #c7dade;
+    border-radius: 6px;
+    background: #fff;
+    color: #07343c;
+    font: 700 13px Arial, sans-serif;
+    cursor: pointer;
+}
+
+.refine-page-button.is-current {
+    background: #07343c;
+    border-color: #07343c;
+    color: #fff;
+}
+
+.refine-page-button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+.refine-page-button:not(:disabled):hover {
+    border-color: #ff790b;
+}
+
+.refine-page-button:focus-visible {
+    outline: 3px solid #3687ab;
+    outline-offset: 2px;
+}
+
+@media (max-width: 600px) {
+    .refine-grid {
+        scroll-margin-top: 110px;
+    }
+
+    .refine-pagination {
+        gap: 5px;
+    }
+
+    .refine-page-button {
+        min-width: 34px;
+        padding: 6px 9px;
+    }
+}

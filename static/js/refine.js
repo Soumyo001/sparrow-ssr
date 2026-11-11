@@ -6,9 +6,14 @@
     if (!app) return;
 
     const $ = id => document.getElementById(id);
+    const PAGE_SIZE = 6;
+
     const ui = {
         heading: $("refine-heading-destination"), breadcrumb: $("refine-breadcrumb-destination"),
         grid: $("refine-grid"), status: $("refine-status"), sort: $("refine-sort"),
+        paginationWrap: $("refine-pagination-wrap"),
+        pagination: $("refine-pagination"),
+        pageSummary: $("refine-page-summary"),
         filter: $("refine-filter-dialog"), filterClose: $("refine-filter-close"),
         filterClear: $("refine-filter-clear"), filterSearch: $("refine-filter-search"),
         eco: $("refine-eco-only"), modalDates: $("refine-modal-dates"),
@@ -29,7 +34,8 @@
     };
 
     const state = {
-        search: "", pax: 2, dateStart: "", dateEnd: "", properties: [],
+        search: "", pax: 2, dateStart: "", dateEnd: "",
+        properties: [], currentPage: 1,
         priceMin: null, priceMax: null, eco: false, amenities: new Set(),
         favorites: new Set()
     };
@@ -218,6 +224,111 @@
         card.append(picture, body);
         return card;
     }
+
+    function pageButton(text, destination, disabled = false, selected = false) {
+        const button = node("button", "refine-page-button", text);
+
+        button.type = "button";
+        button.disabled = disabled;
+
+        if (selected) {
+            button.classList.add("is-current");
+            button.setAttribute("aria-current", "page");
+            button.setAttribute(
+                "aria-label",
+                `Page ${destination}, current page`
+            );
+        } else {
+            button.setAttribute(
+                "aria-label",
+                /^\d+$/.test(String(text))
+                    ? `Go to page ${destination}`
+                    : `${text} page`
+            );
+        }
+
+        button.addEventListener("click", () => {
+            if (button.disabled || state.currentPage === destination) {
+                return;
+            }
+
+            state.currentPage = destination;
+
+            // Filter and sort state remain unchanged.
+            render();
+
+            // Return the visitor to the beginning of the new results.
+            ui.grid.focus({ preventScroll: true });
+            ui.grid.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        });
+
+        return button;
+    }
+
+    function renderPagination(total) {
+        if (total === 0) {
+            ui.paginationWrap.hidden = true;
+            ui.pagination.replaceChildren();
+            ui.pageSummary.textContent = "";
+            state.currentPage = 1;
+
+            return { start: 0, end: 0 };
+        }
+
+        const pageCount = Math.ceil(total / PAGE_SIZE);
+
+        // Prevent an invalid page after the result count changes.
+        state.currentPage = Math.max(
+            1,
+            Math.min(state.currentPage, pageCount)
+        );
+
+        const start = (state.currentPage - 1) * PAGE_SIZE;
+        const end = Math.min(start + PAGE_SIZE, total);
+
+        ui.paginationWrap.hidden = false;
+        ui.pageSummary.textContent =
+            `Showing ${start + 1}–${end} of ${total} properties`;
+
+        const controls = document.createDocumentFragment();
+
+        if (pageCount > 1) {
+            controls.append(
+                pageButton(
+                    "Previous",
+                    state.currentPage - 1,
+                    state.currentPage === 1
+                )
+            );
+
+            for (let page = 1; page <= pageCount; page++) {
+                controls.append(
+                    pageButton(
+                        String(page),
+                        page,
+                        false,
+                        page === state.currentPage
+                    )
+                );
+            }
+
+            controls.append(
+                pageButton(
+                    "Next",
+                    state.currentPage + 1,
+                    state.currentPage === pageCount
+                )
+            );
+        }
+
+        ui.pagination.replaceChildren(controls);
+
+        return { start, end };
+    }
+
     function render() {
         updatePills();
         const results = state.properties.filter(p => {
@@ -231,15 +342,41 @@
         if (ui.sort.value === "price_low") results.sort((a,b) => priceAmount(a) - priceAmount(b) || a.id.localeCompare(b.id));
         else if (ui.sort.value === "price_high") results.sort((a,b) => priceAmount(b) - priceAmount(a) || a.id.localeCompare(b.id));
         else results.sort((a,b) => Number(b.popularity_score) - Number(a.popularity_score) || a.id.localeCompare(b.id));
+
+        const { start, end } = renderPagination(results.length);
+
         const fragment = document.createDocumentFragment();
-        if (!results.length) fragment.append(node("p", "refine-empty", "No properties match your search or filters."));
-        else results.forEach(p => fragment.append(propertyCard(p)));
+
+        if (!results.length) {
+            fragment.append(
+                node(
+                    "p",
+                    "refine-empty",
+                    "No properties match your search or filters."
+                )
+            );
+        } else {
+            results.slice(start, end).forEach(property => {
+                fragment.append(propertyCard(property));
+            });
+        }
+
         ui.grid.replaceChildren(fragment);
-        ui.status.textContent = `${results.length} of ${state.properties.length} properties shown`;
+
+        ui.status.textContent = results.length
+            ? `Showing ${start + 1} through ${end} of ${results.length} matching properties`
+            : "No properties match your search or filters.";
+
         ui.status.classList.remove("is-visible");
     }
+
     async function load() {
         const request = ++latestRequest;
+
+        state.currentPage = 1;
+        ui.paginationWrap.hidden = true;
+        ui.pagination.replaceChildren();
+
         ui.status.textContent = "Loading properties...";
         ui.status.classList.add("is-visible");
         ui.grid.replaceChildren();
@@ -351,8 +488,14 @@
         Object.assign(state, { pax: draft.pax, dateStart: draft.dateStart, dateEnd: draft.dateEnd,
             priceMin: draft.priceMin, priceMax: draft.priceMax, eco: draft.eco, amenities: new Set(draft.amenities) });
         ui.filter.close();
-        if (mustFetch) { updateURL(); load(); }
-        else render();
+
+        if (mustFetch) {
+            updateURL();
+            load();
+        } else {
+            state.currentPage = 1;
+            render();
+        }
     }
 
     function isoDate(year, month, day) {
@@ -468,6 +611,7 @@
                 updatePills();
                 load();
             } else {
+                state.currentPage = 1;
                 render();
             }
 
@@ -498,7 +642,10 @@
     ui.calendarClear.addEventListener("click", () => { chosenStart=""; chosenEnd=""; paintCalendar(); });
     ui.calendarApply.addEventListener("click", acceptDates);
     ui.messageClose.addEventListener("click", () => ui.message.close());
-    ui.sort.addEventListener("change", render);
+    ui.sort.addEventListener("change", () => {
+        state.currentPage = 1;
+        render();
+    });
     window.addEventListener("popstate", () => { parseURL(); load(); });
     parseURL();
     load();
