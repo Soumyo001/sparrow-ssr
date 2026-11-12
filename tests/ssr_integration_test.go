@@ -750,4 +750,79 @@ func TestMultiSiteSSRHTTP(t *testing.T) {
 		}
 	})
 
+	t.Run("CountrySSR", func(t *testing.T) {
+		for _, tc := range []struct {
+			host, path   string
+			wantStatus   int
+			want, reject string
+		}{
+			{
+				"alpha.example.com", "/all/usa",
+				http.StatusOK,
+				"alpha Property", "bravo Property",
+			},
+			{
+				"bravo.example.com", "/all/usa",
+				http.StatusOK,
+				"bravo Property", "alpha Property",
+			},
+			{
+				"alpha.example.com", "/all/canada",
+				http.StatusOK,
+				"No properties are currently listed",
+				"alpha Property",
+			},
+			{
+				"unknown.example.com", "/all/usa",
+				http.StatusNotFound,
+				"Site not found", "alpha Property",
+			},
+			{
+				"alpha.example.com", "/all/USA",
+				http.StatusNotFound,
+				"Country not found", "alpha Property",
+			},
+		} {
+			response := requestPage(tc.host, tc.path)
+
+			if response.Code != tc.wantStatus {
+				t.Errorf(
+					"%s%s: HTTP %d, want %d: %s",
+					tc.host, tc.path,
+					response.Code, tc.wantStatus,
+					response.Body.String(),
+				)
+				continue
+			}
+
+			body := response.Body.String()
+
+			if !strings.Contains(body, tc.want) ||
+				strings.Contains(body, tc.reject) {
+				t.Errorf(
+					"%s%s: wrong country/site content",
+					tc.host, tc.path,
+				)
+			}
+
+			if tc.wantStatus == http.StatusOK {
+				if !strings.Contains(
+					body, `id="country-results"`,
+				) ||
+					!strings.Contains(
+						body,
+						"https://"+tc.host+tc.path,
+					) ||
+					strings.Contains(
+						body, `/static/js/refine.js`,
+					) {
+					t.Errorf(
+						"%s%s: expected server-rendered country page",
+						tc.host, tc.path,
+					)
+				}
+			}
+		}
+	})
+
 }

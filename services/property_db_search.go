@@ -11,10 +11,8 @@ import (
 )
 
 type PropertySearcher interface {
-	Search(
-		siteDirectory string,
-		filters PropertyFilters,
-	) ([]models.Property, error)
+	Search(siteDirectory string, filters PropertyFilters) ([]models.Property, error)
+	SearchCountry(siteDirectory, country string) ([]models.Property, error)
 }
 
 // DatabasePropertySearchService reads accommodation data exclusively from PostgreSQL.

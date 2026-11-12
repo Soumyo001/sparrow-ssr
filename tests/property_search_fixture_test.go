@@ -65,3 +65,21 @@ func (s fixturePropertySearcher) Search(
 
 	return []models.Property{property}, nil
 }
+
+// SearchCountry is an exact-country test fixture.
+// It never accesses the production database.
+func (s fixturePropertySearcher) SearchCountry(
+	siteDirectory, country string,
+) ([]models.Property, error) {
+	record, found := s[siteDirectory]
+
+	if !found ||
+		!strings.EqualFold(
+			record.property.Location.Country,
+			country,
+		) {
+		return []models.Property{}, nil
+	}
+
+	return []models.Property{record.property}, nil
+}

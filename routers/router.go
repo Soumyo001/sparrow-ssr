@@ -30,6 +30,13 @@ func Register(
 		"get:Get",
 	)
 
+	// country page SSR route
+	beego.Router(
+		"/all/:country",
+		&controllers.CountryController{},
+		"get:Get",
+	)
+
 	// Preserve the existing publisher page routing.
 	beego.Router("/*", &controllers.PageController{})
 }
@@ -45,6 +52,7 @@ func RegisterPropertyAPI(
 		catalog,
 		search,
 	)
+	controllers.SetCountrySearchDependencies(search)
 
 	beego.Router(
 		"/api/properties",

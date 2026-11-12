@@ -146,4 +146,50 @@ func TestDatabasePropertySearchSeededNeon(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("country_usa", func(t *testing.T) {
+		got, err := search.SearchCountry(site, "USA")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(got) != 15 {
+			t.Fatalf("want 15 USA properties, got %d", len(got))
+		}
+
+		for _, property := range got {
+			if property.Location.Country != "USA" ||
+				property.Slug == "" {
+				t.Fatalf(
+					"unexpected country property: %+v",
+					property,
+				)
+			}
+		}
+	})
+
+	t.Run("country_canada_empty", func(t *testing.T) {
+		got, err := search.SearchCountry(site, "Canada")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(got) != 0 {
+			t.Fatalf("want 0 Canadian properties, got %d", len(got))
+		}
+	})
+
+	t.Run("country_unknown_site", func(t *testing.T) {
+		got, err := search.SearchCountry(
+			"beta/preview/unknown", "USA",
+		)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(got) != 0 {
+			t.Fatalf("unknown site returned %d properties", len(got))
+		}
+	})
+
 }

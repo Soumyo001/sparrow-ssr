@@ -1,0 +1,39 @@
+
+/*
+ * Country SSR page.
+ * Reuse /refine card styles without modifying /refine behavior.
+ */
+
+body.country-route .country-refine-link {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 0;
+    height: auto;
+    min-height: 31px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+body.country-route .country-refine-link:focus-visible,
+body.country-route .country-availability:focus-visible {
+    outline: 3px solid #3687ab;
+    outline-offset: 2px;
+}
+
+body.country-route .country-count {
+    font: 600 13px Arial, Helvetica, sans-serif;
+    color: #31575a;
+}
+
+body.country-route .country-availability {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+body.country-route .country-unavailable {
+    color: #42616b;
+    font-size: 12px;
+}
