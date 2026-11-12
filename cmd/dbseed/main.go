@@ -48,9 +48,9 @@ func main() {
 	if err := validateSeedData(seedProperties); err != nil {
 		log.Fatalf("invalid seed data: %v", err)
 	}
-	databaseURL := os.Getenv("DATABASE_URL_DIRECT")
+	databaseURL := os.Getenv("DATABASE_URL")
 	if databaseURL == "" {
-		databaseURL = os.Getenv("DATABASE_URL")
+		databaseURL = os.Getenv("DATABASE_URL_POOLED")
 	}
 	if err := services.InitPropertyDatabase(databaseURL); err != nil {
 		log.Fatalf("initialize PostgreSQL: %v", err)
