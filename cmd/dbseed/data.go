@@ -7,6 +7,7 @@ import "sparrow-ssr/models"
 var seedProperties = []seedProperty{
 	{
 		ID: "prop-001", Name: "The Plaza, A Fairmont Hotel", Type: "Hotel",
+		Slug:      "the-plaza-a-fairmont-hotel",
 		Location:  models.PropertyLocation{City: "New York", State: "New York", Area: "Midtown Manhattan", Country: "USA"},
 		MaxGuests: 2, PriceFrom: 890, Currency: "USD",
 		Rating: 8.6, ReviewCount: 509, PopularityScore: 509,
@@ -17,6 +18,7 @@ var seedProperties = []seedProperty{
 	},
 	{
 		ID: "prop-002", Name: "Hilton Hawaiian Village Waikiki Beach Resort", Type: "Resort",
+		Slug:      "hilton-hawaiian-village-waikiki-beach-resort",
 		Location:  models.PropertyLocation{City: "Honolulu", State: "Hawaii", Area: "Waikiki", Country: "USA"},
 		MaxGuests: 6, PriceFrom: 315, Currency: "USD",
 		Rating: 8.4, ReviewCount: 10199, PopularityScore: 10199,
@@ -27,6 +29,7 @@ var seedProperties = []seedProperty{
 	},
 	{
 		ID: "prop-003", Name: "The Venetian Resort Las Vegas", Type: "Resort",
+		Slug:      "the-venetian-resort-las-vegas",
 		Location:  models.PropertyLocation{City: "Las Vegas", State: "Nevada", Area: "Las Vegas Strip", Country: "USA"},
 		MaxGuests: 8, PriceFrom: 360, Currency: "USD",
 		Rating: 8.9, ReviewCount: 9826, PopularityScore: 9826,
@@ -37,6 +40,7 @@ var seedProperties = []seedProperty{
 	},
 	{
 		ID: "prop-004", Name: "Hilton Waikiki Beach Resort & Spa", Type: "Resort",
+		Slug:      "hilton-waikiki-beach-resort-spa",
 		Location:  models.PropertyLocation{City: "Honolulu", State: "Hawaii", Area: "Waikiki", Country: "USA"},
 		MaxGuests: 4, PriceFrom: 265, Currency: "USD",
 		Rating: 8.6, ReviewCount: 2439, PopularityScore: 2439,
@@ -47,6 +51,7 @@ var seedProperties = []seedProperty{
 	},
 	{
 		ID: "prop-005", Name: "Fontainebleau Miami Beach", Type: "Resort",
+		Slug:      "fontainebleau-miami-beach",
 		Location:  models.PropertyLocation{City: "Miami Beach", State: "Florida", Area: "Mid-Beach", Country: "USA"},
 		MaxGuests: 6, PriceFrom: 495, Currency: "USD",
 		Rating: 7.5, ReviewCount: 2136, PopularityScore: 2136,
@@ -57,6 +62,7 @@ var seedProperties = []seedProperty{
 	},
 	{
 		ID: "prop-006", Name: "Waikiki Beach Marriott Resort & Spa", Type: "Resort",
+		Slug:      "waikiki-beach-marriott-resort-spa",
 		Location:  models.PropertyLocation{City: "Honolulu", State: "Hawaii", Area: "Waikiki", Country: "USA"},
 		MaxGuests: 4, PriceFrom: 355, Currency: "USD",
 		Rating: 9.0, ReviewCount: 3863, PopularityScore: 3863,
@@ -67,6 +73,7 @@ var seedProperties = []seedProperty{
 	},
 	{
 		ID: "prop-007", Name: "The Beverly Hills Hotel - Dorchester Collection", Type: "Hotel",
+		Slug:      "the-beverly-hills-hotel-dorchester-collection",
 		Location:  models.PropertyLocation{City: "Los Angeles", State: "California", Area: "Beverly Hills", Country: "USA"},
 		MaxGuests: 2, PriceFrom: 1250, Currency: "USD",
 		Rating: 9.2, ReviewCount: 166, PopularityScore: 166,
@@ -77,6 +84,7 @@ var seedProperties = []seedProperty{
 	},
 	{
 		ID: "prop-008", Name: "Waikiki Resort Hotel", Type: "Hotel",
+		Slug:      "waikiki-resort-hotel",
 		Location:  models.PropertyLocation{City: "Honolulu", State: "Hawaii", Area: "Waikiki", Country: "USA"},
 		MaxGuests: 4, PriceFrom: 180, Currency: "USD",
 		Rating: 8.4, ReviewCount: 3696, PopularityScore: 3696,
@@ -87,6 +95,7 @@ var seedProperties = []seedProperty{
 	},
 	{
 		ID: "prop-009", Name: "Hyatt Regency Orlando", Type: "Hotel",
+		Slug:      "hyatt-regency-orlando",
 		Location:  models.PropertyLocation{City: "Orlando", State: "Florida", Area: "International Drive", Country: "USA"},
 		MaxGuests: 4, PriceFrom: 280, Currency: "USD",
 		Rating: 8.6, ReviewCount: 795, PopularityScore: 795,
@@ -97,6 +106,7 @@ var seedProperties = []seedProperty{
 	},
 	{
 		ID: "prop-010", Name: "'Alohilani Resort Waikiki Beach", Type: "Resort",
+		Slug:      "alohilani-resort-waikiki-beach",
 		Location:  models.PropertyLocation{City: "Honolulu", State: "Hawaii", Area: "Waikiki", Country: "USA"},
 		MaxGuests: 6, PriceFrom: 400, Currency: "USD",
 		Rating: 8.8, ReviewCount: 4321, PopularityScore: 4321,
@@ -107,6 +117,7 @@ var seedProperties = []seedProperty{
 	},
 	{
 		ID: "prop-011", Name: "Hotel del Coronado, Curio Collection by Hilton", Type: "Resort",
+		Slug:      "hotel-del-coronado-curio-collection-by-hilton",
 		Location:  models.PropertyLocation{City: "San Diego", State: "California", Area: "Coronado", Country: "USA"},
 		MaxGuests: 8, PriceFrom: 640, Currency: "USD",
 		Rating: 8.2, ReviewCount: 344, PopularityScore: 344,
@@ -117,6 +128,7 @@ var seedProperties = []seedProperty{
 	},
 	{
 		ID: "prop-012", Name: "Hyatt Place Waikiki Beach", Type: "Hotel",
+		Slug:      "hyatt-place-waikiki-beach",
 		Location:  models.PropertyLocation{City: "Honolulu", State: "Hawaii", Area: "Waikiki", Country: "USA"},
 		MaxGuests: 4, PriceFrom: 220, Currency: "USD",
 		Rating: 8.6, ReviewCount: 4943, PopularityScore: 4943,
@@ -127,6 +139,7 @@ var seedProperties = []seedProperty{
 	},
 	{
 		ID: "prop-013", Name: "Fairmont San Francisco", Type: "Hotel",
+		Slug:      "fairmont-san-francisco",
 		Location:  models.PropertyLocation{City: "San Francisco", State: "California", Area: "Nob Hill", Country: "USA"},
 		MaxGuests: 2, PriceFrom: 520, Currency: "USD",
 		Rating: 8.4, ReviewCount: 862, PopularityScore: 862,
@@ -137,6 +150,7 @@ var seedProperties = []seedProperty{
 	},
 	{
 		ID: "prop-014", Name: "Halepuna Waikiki by Halekulani", Type: "Hotel",
+		Slug:      "halepuna-waikiki-by-halekulani",
 		Location:  models.PropertyLocation{City: "Honolulu", State: "Hawaii", Area: "Waikiki", Country: "USA"},
 		MaxGuests: 2, PriceFrom: 345, Currency: "USD",
 		Rating: 9.4, ReviewCount: 2144, PopularityScore: 2144,
@@ -147,6 +161,7 @@ var seedProperties = []seedProperty{
 	},
 	{
 		ID: "prop-015", Name: "The Royal Hawaiian, A Luxury Collection Resort, Waikiki", Type: "Resort",
+		Slug:      "the-royal-hawaiian-a-luxury-collection-resort-waikiki",
 		Location:  models.PropertyLocation{City: "Honolulu", State: "Hawaii", Area: "Waikiki", Country: "USA"},
 		MaxGuests: 6, PriceFrom: 690, Currency: "USD",
 		Rating: 8.4, ReviewCount: 452, PopularityScore: 452,

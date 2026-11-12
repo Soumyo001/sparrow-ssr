@@ -44,7 +44,7 @@ func main() {
 	log.Println("PostgreSQL schema ready: tables, indexes, and foreign keys")
 }
 
-// ensureForeignKeys adds the three required relationships.
+// ensureForeignKeys adds the two required relationships.
 // Existing named constraints are skipped.
 //
 // All additions run in one transaction, so a failure rolls back
@@ -58,17 +58,6 @@ func ensureForeignKeys(
 		constraintName string
 		statement      string
 	}{
-		{
-			tableName:      "public.properties",
-			constraintName: "properties_site_id_fkey",
-			statement: `
-				ALTER TABLE public.properties
-				ADD CONSTRAINT properties_site_id_fkey
-				FOREIGN KEY (site_id)
-				REFERENCES public.sites(id)
-				ON DELETE CASCADE
-			`,
-		},
 		{
 			tableName:      "public.properties",
 			constraintName: "properties_location_id_fkey",

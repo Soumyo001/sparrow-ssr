@@ -18,3 +18,9 @@ func (*AvailabilityRecord) TableUnique() [][]string {
 		{"Property", "StartDate", "EndDate"},
 	}
 }
+
+func (*AvailabilityRecord) TableIndex() [][]string {
+	return [][]string{
+		{"StartDate", "EndDate"},
+	}
+}

@@ -131,7 +131,8 @@ func TestDatabasePropertySearchSeededNeon(t *testing.T) {
 			}
 
 			for _, p := range got {
-				if p.MaxGuests < 1 ||
+				if p.Slug == "" ||
+					p.MaxGuests < 1 ||
 					p.PriceFrom < 1 ||
 					p.Location.Country == "" ||
 					len(p.Images) == 0 ||

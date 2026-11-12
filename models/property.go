@@ -13,6 +13,7 @@ type PropertyLocation struct {
 // Do not register this struct with Beego ORM.
 type Property struct {
 	ID              string           `json:"id"`
+	Slug            string           `json:"slug"`
 	Name            string           `json:"name"`
 	PropertyType    string           `json:"property_type"`
 	Location        PropertyLocation `json:"location"`
@@ -29,15 +30,6 @@ type Property struct {
 	EcoFriendly     bool             `json:"eco_friendly"`
 	Images          []string         `json:"images"`
 }
-
-// SiteRecord identifies one deployment's property catalog. Key is the
-// deployment-derived ContentDirectory, never a guessed hostname or path.
-type SiteRecord struct {
-	Id  int64  `orm:"auto"`
-	Key string `orm:"size(255);unique"`
-}
-
-func (*SiteRecord) TableName() string { return "sites" }
 
 // LocationRecord stores a reusable city/state/area/country combination.
 type LocationRecord struct {
@@ -57,7 +49,8 @@ func (*LocationRecord) TableUnique() [][]string {
 
 type PropertyRecord struct {
 	Id              int64           `orm:"auto"`
-	Site            *SiteRecord     `orm:"rel(fk);on_delete(cascade)"`
+	SiteKey         string          `orm:"column(site_key);size(255)"`
+	Slug            string          `orm:"size(255)"`
 	Location        *LocationRecord `orm:"rel(fk);on_delete(do_nothing)"`
 	PropertyID      string          `orm:"column(property_id);size(100)"`
 	Name            string          `orm:"size(512)"`
@@ -78,11 +71,14 @@ type PropertyRecord struct {
 
 func (*PropertyRecord) TableName() string { return "properties" }
 func (*PropertyRecord) TableUnique() [][]string {
-	return [][]string{{"Site", "PropertyID"}}
+	return [][]string{
+		{"SiteKey", "PropertyID"},
+		{"SiteKey", "Slug"},
+	}
 }
 func (*PropertyRecord) TableIndex() [][]string {
 	return [][]string{
-		{"Site", "MaxGuests"},
-		{"Site", "PopularityScore"},
+		{"MaxGuests"},
+		{"PopularityScore"},
 	}
 }

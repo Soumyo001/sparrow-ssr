@@ -34,3 +34,21 @@ func TestRejectDuplicateSeedID(t *testing.T) {
 		t.Fatal("expected duplicate ID to be rejected")
 	}
 }
+
+func TestRejectDuplicateSeedSlug(t *testing.T) {
+	duplicate := append([]seedProperty(nil), seedProperties...)
+	duplicate[1].Slug = duplicate[0].Slug
+
+	if err := validateSeedData(duplicate); err == nil {
+		t.Fatal("expected duplicate slug to be rejected")
+	}
+}
+
+func TestRejectInvalidSeedSlug(t *testing.T) {
+	invalid := append([]seedProperty(nil), seedProperties...)
+	invalid[0].Slug = "Not Valid"
+
+	if err := validateSeedData(invalid); err == nil {
+		t.Fatal("expected invalid slug to be rejected")
+	}
+}

@@ -46,7 +46,7 @@ func (s *DatabasePropertySearchService) Search(
 	// Restrict every search to the deployment-derived site
 	// and properties capable of accommodating the guest count.
 	condition := orm.NewCondition().
-		And("Site__Key", siteDirectory).
+		And("SiteKey", siteDirectory).
 		And("MaxGuests__gte", filters.Pax)
 
 	// Search across the property name and related location fields.
@@ -68,7 +68,7 @@ func (s *DatabasePropertySearchService) Search(
 		var windows []models.AvailabilityRecord
 
 		_, err := o.QueryTable(new(models.AvailabilityRecord)).
-			Filter("Property__Site__Key", siteDirectory).
+			Filter("Property__SiteKey", siteDirectory).
 			Filter("StartDate__lte", start).
 			Filter("EndDate__gte", end).
 			RelatedSel("Property").
@@ -160,6 +160,7 @@ func (s *DatabasePropertySearchService) Search(
 
 		results = append(results, models.Property{
 			ID:           row.PropertyID,
+			Slug:         row.Slug,
 			Name:         row.Name,
 			PropertyType: row.PropertyType,
 			Location: models.PropertyLocation{

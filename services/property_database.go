@@ -36,7 +36,6 @@ func InitPropertyDatabase(databaseURL string) error {
 	orm.DefaultTimeLoc = time.UTC
 
 	orm.RegisterModel(
-		new(models.SiteRecord),
 		new(models.LocationRecord),
 		new(models.PropertyRecord),
 		new(models.AvailabilityRecord),
