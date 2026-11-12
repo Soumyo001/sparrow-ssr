@@ -43,9 +43,7 @@ func main() {
 	}
 
 	// Initialize the frontend content loader.
-	loader, err := services.NewContentLoader(
-		contentRoot,
-	)
+	loader, err := services.NewContentLoader(contentRoot)
 	if err != nil {
 		log.Fatalf(
 			"initialize content loader: %v", err,
