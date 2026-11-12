@@ -10,6 +10,13 @@ import (
 	"github.com/beego/beego/v2/client/orm"
 )
 
+type PropertySearcher interface {
+	Search(
+		siteDirectory string,
+		filters PropertyFilters,
+	) ([]models.Property, error)
+}
+
 // DatabasePropertySearchService reads accommodation data exclusively from PostgreSQL.
 type DatabasePropertySearchService struct{}
 
@@ -186,3 +193,5 @@ func (s *DatabasePropertySearchService) Search(
 
 	return results, nil
 }
+
+var _ PropertySearcher = (*DatabasePropertySearchService)(nil)
