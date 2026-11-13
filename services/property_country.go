@@ -29,7 +29,7 @@ func (s *DatabasePropertySearchService) SearchCountry(
 		Limit(-1).All(&rows)
 
 	if err != nil {
-		return nil, fmt.Errorf("querty contains properties: %w", err)
+		return nil, fmt.Errorf("query country properties: %w", err)
 	}
 
 	properties := make([]models.Property, 0, len(rows))
