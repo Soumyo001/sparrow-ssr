@@ -174,9 +174,7 @@ func (c *CountryController) Get() {
 	cards := make([]countryCard, 0, len(properties))
 
 	for _, p := range properties {
-		detailParts := make(
-			[]string, 0, len(p.Amenities)+1,
-		)
+		detailParts := make([]string, 0, len(p.Amenities)+1)
 
 		if p.SizeSqFt > 0 {
 			detailParts = append(
