@@ -228,6 +228,7 @@ func (c *CountryController) Get() {
 	c.Data["Language"] = language
 	c.Data["SiteName"] = content.Header.SiteName
 	c.Data["Country"] = country
+	c.Data["IsCountry"] = true
 	c.Data["Total"] = len(cards)
 	c.Data["Cards"] = cards
 
@@ -254,7 +255,7 @@ func (c *CountryController) Get() {
 		content.Header.WidgetCode,
 	)
 
-	c.TplName = "all.tpl"
+	c.TplName = "refine.tpl"
 
 	if err := c.Render(); err != nil {
 		log.Printf("Country page rendering failed: %v", err)

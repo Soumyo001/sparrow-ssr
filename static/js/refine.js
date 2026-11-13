@@ -2,8 +2,12 @@
 (() => {
     "use strict";
 
-    const app = document.getElementById("refine-app");
+    const app = document.getElementById("refine-app") ||
+        document.getElementById("country-results");
     if (!app) return;
+
+    const country = (app.dataset.country || "").trim();
+    const isCountry = country.length > 0;
 
     const $ = id => document.getElementById(id);
     const PAGE_SIZE = 6;
@@ -50,25 +54,55 @@
         if (text !== undefined) n.textContent = String(text);
         return n;
     }
+
     function parseURL() {
         const params = new URLSearchParams(location.search);
-        state.search = (params.get("search") || "").trim();
+    
+        state.search = isCountry
+            ? country
+            : (params.get("search") || "").trim();
+    
         const pax = Number(params.get("pax") || 2);
-        state.pax = Number.isInteger(pax) && pax >= 1 && pax <= 20 ? pax : 2;
+        state.pax = Number.isInteger(pax) && pax >= 1 && pax <= 20
+            ? pax
+            : 2;
+    
         state.dateStart = params.get("dateStart") || "";
         state.dateEnd = params.get("dateEnd") || "";
-        const name = state.search || "your destination";
-        ui.heading.textContent = name;
-        ui.breadcrumb.textContent = name;
+    
+        if (!isCountry) {
+            const name = state.search || "your destination";
+            ui.heading.textContent = name;
+            ui.breadcrumb.textContent = name;
+        }
+    
         updatePills();
     }
+
     function updateURL() {
-        const params = new URLSearchParams({ search: state.search, pax: String(state.pax), order: "1" });
+        const params = new URLSearchParams({
+            pax: String(state.pax),
+            order: "1"
+        });
+
+        if (!isCountry) {
+            params.set("search", state.search);
+        }
+
         if (state.dateStart && state.dateEnd) {
             params.set("dateStart", state.dateStart);
             params.set("dateEnd", state.dateEnd);
         }
-        history.pushState({}, "", `/refine?${params.toString()}`);
+
+        const path = isCountry
+            ? window.location.pathname
+            : "/refine";
+
+        history.pushState(
+            {},
+            "",
+            `${path}?${params.toString()}`
+        );
     }
 
     function updatePills() {
@@ -370,8 +404,11 @@
         ui.status.classList.remove("is-visible");
     }
 
+    let countryHydrated = false;
+
     async function load() {
         const request = ++latestRequest;
+        const preserveInitialSSR = isCountry && !countryHydrated;
 
         state.currentPage = 1;
         ui.paginationWrap.hidden = true;
@@ -379,23 +416,60 @@
 
         ui.status.textContent = "Loading properties...";
         ui.status.classList.add("is-visible");
-        ui.grid.replaceChildren();
-        const params = new URLSearchParams({ search: state.search, pax: String(state.pax), order: "1" });
+
+        // Keep the initial server-rendered cards visible until
+        // the first successful client-side enhancement.
+        if (!preserveInitialSSR) {
+            ui.grid.replaceChildren();
+        }
+
+        // PostgreSQL Search() applies guest and date conditions.
+        // Its destination search is keyword-based, so we enforce
+        // exact country equality on the returned results below.
+        const params = new URLSearchParams({
+            search: state.search,
+            pax: String(state.pax),
+            order: "1"
+        });
+
         if (state.dateStart || state.dateEnd) {
             params.set("dateStart", state.dateStart);
             params.set("dateEnd", state.dateEnd);
         }
+
         try {
-            const response = await fetch(`/api/properties?${params}`, { headers: { Accept: "application/json" } });
+            const response = await fetch(
+                `/api/properties?${params}`,
+                { headers: { Accept: "application/json" } }
+            );
+
             const data = await response.json();
-            if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
-            if (!Array.isArray(data.properties)) throw new Error("Unexpected API response");
+
+            if (!response.ok) {
+                throw new Error(data.error || `HTTP ${response.status}`);
+            }
+
+            if (!Array.isArray(data.properties)) {
+                throw new Error("Unexpected API response");
+            }
+
             if (request !== latestRequest) return;
-            state.properties = data.properties;
+
+            state.properties = isCountry
+                ? data.properties.filter(property =>
+                    String(
+                        property.location?.country || ""
+                    ).toLowerCase() === country.toLowerCase()
+                )
+                : data.properties;
+
+            countryHydrated = true;
             render();
         } catch (err) {
             if (request !== latestRequest) return;
-            ui.status.textContent = `Unable to load properties: ${err.message}`;
+
+            ui.status.textContent =
+                `Unable to load properties: ${err.message}`;
             ui.status.classList.add("is-visible");
         }
     }
@@ -647,6 +721,36 @@
         render();
     });
     window.addEventListener("popstate", () => { parseURL(); load(); });
+    
+    function alignWithPublisherHeader() {
+        const navigation = document.getElementById("main-navigation");
+        const inner = app.querySelector(".refine-inner");
+    
+        // Other publisher sites might use different header markup.
+        // CSS provides a fallback when this navigation is absent.
+        if (!navigation || !inner) return;
+    
+        const navRect = navigation.getBoundingClientRect();
+        const pageRect = app.getBoundingClientRect();
+    
+        if (navRect.width <= 0 || pageRect.width <= 0) return;
+    
+        const left = Math.max(0, navRect.left - pageRect.left);
+        const right = Math.max(0, pageRect.right - navRect.right);
+    
+        if (left + right >= pageRect.width) return;
+    
+        inner.style.width = "auto";
+        inner.style.maxWidth = "none";
+        inner.style.marginLeft = `${left}px`;
+        inner.style.marginRight = `${right}px`;
+        inner.style.paddingInline = "0";
+    }
+    
+    window.addEventListener("resize", alignWithPublisherHeader);
+    
+    alignWithPublisherHeader();
     parseURL();
     load();
 })();
+

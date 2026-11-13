@@ -9,17 +9,38 @@
     {{if .GlobalCSS}}<link rel="stylesheet" href="{{.GlobalCSS}}">{{end}}
     {{if .TemplateCSS}}<link rel="stylesheet" href="{{.TemplateCSS}}">{{end}}
     <link rel="stylesheet" href="/static/css/refine.css">
+        {{if .IsCountry}}
+    <link rel="stylesheet" href="/static/css/all.css">
+    {{end}}
     <link rel="stylesheet" href="/static/css/property_search_popup.css">
     {{.WidgetHTML}}
 </head>
-<body class="refine-route">
+<body class="refine-route{{if .IsCountry}} country-route{{end}}">
     {{.HeaderHTML}}
 
-    <main id="refine-app" class="refine-app">
+
+    <main id="{{if .IsCountry}}country-results{{else}}refine-app{{end}}"
+          class="refine-app"{{if .IsCountry}} data-country="{{.Country}}"{{end}}>
         <div class="refine-inner">
-            <p class="refine-breadcrumb">Vacation Rentals in <span id="refine-breadcrumb-destination">your destination</span></p>
-            <h1>Find a Place to Stay in <span id="refine-heading-destination">your destination</span></h1>
+            {{if .IsCountry}}
+            <p class="refine-breadcrumb">
+                {{.Total}} Vacation Rentals Near {{.Country}} | {{.Country}}
+            </p>
+            <h1>{{.Country}} Resorts, Hotels &amp; Rentals</h1>
+            <p class="refine-subtitle">
+                Plan your next getaway to {{.Country}}
+            </p>
+            {{else}}
+            <p class="refine-breadcrumb">
+                Vacation Rentals in
+                <span id="refine-breadcrumb-destination">your destination</span>
+            </p>
+            <h1>
+                Find a Place to Stay in
+                <span id="refine-heading-destination">your destination</span>
+            </h1>
             <p class="refine-subtitle">Plan Your Perfect Getaway to</p>
+            {{end}}
 
             <div class="refine-toolbar">
                 <div class="refine-filters" role="group" aria-label="Property filters">
@@ -73,8 +94,84 @@
 
             <section id="refine-grid"
                      class="refine-grid"
-                     aria-label="Property listings"
-                     tabindex="-1"></section>
+                     aria-label="{{if .IsCountry}}{{.Country}} property listings{{else}}Property listings{{end}}"
+                     tabindex="-1">
+
+                {{if .IsCountry}}
+                {{range .Cards}}
+                <article class="refine-card">
+                    <div class="refine-card-picture">
+                        {{if .Photo}}
+                        <img class="refine-card-image"
+                             src="{{.Photo}}"
+                             loading="lazy"
+                             alt="Illustrative accommodation photograph for {{.Name}}">
+                        {{else}}
+                        <div class="refine-image-fallback">
+                            Photo unavailable
+                        </div>
+                        {{end}}
+
+                        <span class="refine-price">{{.Price}}</span>
+
+                        {{if .Eco}}
+                        <span class="refine-eco">Eco</span>
+                        {{end}}
+                    </div>
+
+                    <div class="refine-card-body">
+                        <div class="refine-card-meta">
+                            <span class="refine-rating">
+                                <span class="refine-rating-icon"
+                                      aria-hidden="true">●</span>
+                                {{printf "%.1f" .Rating}}
+                                ({{.Reviews}} Reviews)
+                            </span>
+
+                            <span class="refine-property-type">
+                                {{.Type}}
+                            </span>
+                        </div>
+
+                        <h2 class="refine-card-title">
+                            {{.Name}}
+                        </h2>
+
+                        <p class="refine-card-details">
+                            {{.Amenities}}
+                        </p>
+
+                        <p class="refine-card-location">
+                            {{.Location}}
+                        </p>
+
+                        <div class="refine-card-bottom">
+                            <span class="refine-provider">
+                                {{.Provider}}
+                            </span>
+
+                            {{if .BookingURL}}
+                            <a class="refine-availability country-availability"
+                               href="{{.BookingURL}}"
+                               rel="noopener noreferrer">
+                                View Availability
+                            </a>
+                            {{else}}
+                            <span class="country-unavailable">
+                                Provider link unavailable
+                            </span>
+                            {{end}}
+                        </div>
+                    </div>
+                </article>
+
+                {{else}}
+                <p class="refine-empty">
+                    No properties are currently listed in {{$.Country}}.
+                </p>
+                {{end}}
+                {{end}}
+            </section>
 
             <div id="refine-pagination-wrap"
                  class="refine-pagination-wrap"

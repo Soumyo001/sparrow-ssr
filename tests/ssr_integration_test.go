@@ -813,11 +813,17 @@ func TestMultiSiteSSRHTTP(t *testing.T) {
 						body,
 						"https://"+tc.host+tc.path,
 					) ||
-					strings.Contains(
+					!strings.Contains(
 						body, `/static/js/refine.js`,
+					) ||
+					!strings.Contains(
+						body, `id="refine-pagination"`,
+					) ||
+					!strings.Contains(
+						body, `data-filter-open="dates"`,
 					) {
 					t.Errorf(
-						"%s%s: expected server-rendered country page",
+						"%s%s: expected SSR country page with shared filters",
 						tc.host, tc.path,
 					)
 				}
