@@ -42,6 +42,26 @@ func main() {
 		log.Fatalf("initialize site catalog: %v", err)
 	}
 
+	// An optional, explicitly registered preview hostname for render
+	previewHost := strings.TrimSpace(
+		os.Getenv("SPARROW_PREVIEW_HOST"),
+	)
+	previewSource := strings.TrimSpace(
+		os.Getenv("SPARROW_PREVIEW_SOURCE_HOST"),
+	)
+
+	if previewHost != "" || previewSource != "" {
+		if err := catalog.RegisterPreviewAlias(
+			previewSource,
+			previewHost,
+		); err != nil {
+			log.Fatalf(
+				"register preview hostname: %v",
+				err,
+			)
+		}
+	}
+
 	// Initialize the frontend content loader.
 	loader, err := services.NewContentLoader(contentRoot)
 	if err != nil {
@@ -73,7 +93,7 @@ func main() {
 	}
 
 	log.Printf(
-		"Catalog ready: %d pages from %d deployment(s)",
+		"Catalog ready: %d routes from %d deployment(s)",
 		catalog.Count(),
 		len(deploymentFiles),
 	)
