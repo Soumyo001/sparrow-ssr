@@ -9,8 +9,8 @@
     {{if .GlobalCSS}}<link rel="stylesheet" href="{{.GlobalCSS}}">{{end}}
     {{if .TemplateCSS}}<link rel="stylesheet" href="{{.TemplateCSS}}">{{end}}
     <link rel="stylesheet" href="/static/css/refine.css">
-        {{if .IsCountry}}
-    <link rel="stylesheet" href="/static/css/all.css">
+    {{if .IsCountry}}
+        <link rel="stylesheet" href="/static/css/all.css">
     {{end}}
     <link rel="stylesheet" href="/static/css/property_search_popup.css">
     {{.WidgetHTML}}
